@@ -111,12 +111,20 @@ export default {
           JQuery.ajax({
             url: 'https://api.github.com/repos/CSSEGISandData/COVID-19/contents/csse_covid_19_data/csse_covid_19_daily_reports',
             async: false,
+            crossDomain: true,
+            accept: {
+              'Access-Control-Allow-Origin': '*'
+            },
             success: function (result) {
               const newestFile = result[result.length - 2]
               const dataList = []
               JQuery.ajax({
                 url: newestFile.download_url,
                 async: false,
+                crossDomain: true,
+                accept: {
+                  'Access-Control-Allow-Origin': '*'
+                },
                 success: function (result) {
                   const csvdata = Papa.parse(result)
                   for (var i = 1; i < csvdata.data.length - 1; i++) {
