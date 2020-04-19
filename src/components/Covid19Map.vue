@@ -110,7 +110,7 @@ export default {
 
           JQuery.ajax({
             url: 'https://api.github.com/repos/CSSEGISandData/COVID-19/contents/csse_covid_19_data/csse_covid_19_daily_reports',
-            async: true,
+            async: false,
             success: function (result) {
               const newestFile = result[result.length - 2]
               const dataList = []
