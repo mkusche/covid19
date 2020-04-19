@@ -4,6 +4,7 @@
       id="vector-map"
       ref="vectorMap"
       :bounds="bounds"
+      :touchEnabled="true"
       @click="markerClick" >
       <DxLayer
         :data-source="mapsWorld"
@@ -16,7 +17,7 @@
         :opacity="0.8"
         name="bubbles"
         element-type="bubble"
-        color="#FF1100"
+        color="#ff3300"
         data-field="confirmed" />
       <DxLayer
         :data-source="markers"
