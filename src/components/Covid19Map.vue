@@ -103,21 +103,21 @@ export default {
       return groupSize
     },
     getDataSource () {
+      const that = this
       const ds = new DataSource({
         load: () => {
           const deferred = JQuery.Deferred()
 
           JQuery.ajax({
             url: 'https://api.github.com/repos/CSSEGISandData/COVID-19/contents/csse_covid_19_data/csse_covid_19_daily_reports',
-            async: false,
+            async: true,
             success: function (result) {
               const newestFile = result[result.length - 2]
-
+              const dataList = []
               JQuery.ajax({
                 url: newestFile.download_url,
                 async: false,
                 success: function (result) {
-                  const dataList = []
                   const csvdata = Papa.parse(result)
                   for (var i = 1; i < csvdata.data.length - 1; i++) {
                     const isCompressRegion = (csvdata.data[i][3] === 'US' || csvdata.data[i][3] === 'China' ||
@@ -128,7 +128,7 @@ export default {
                     if (isCompressRegion) {
                       regionName = csvdata.data[i][3]
                     } else {
-                      regionName = csvdata.data[i][1] ? csvdata.data[i][1] + ', ' : ''
+                      // regionName = csvdata.data[i][1] ? csvdata.data[i][1] + ', ' : ''
                       regionName += csvdata.data[i][2] ? csvdata.data[i][2] + ', ' : ''
                       regionName += csvdata.data[i][3]
                     }
@@ -170,15 +170,21 @@ export default {
                             confirmed: parseInt(csvdata.data[i][7]),
                             recovered: parseInt(csvdata.data[i][9]),
                             deaths: parseInt(csvdata.data[i][8]),
-                            active: parseInt(csvdata.data[i][10])
+                            active: parseInt(csvdata.data[i][10]),
+                            confirmedDaily: [],
+                            recoveredDaily: [],
+                            deathsDaily: []
                           }
                         })
                       }
                     }
-                    deferred.resolve(dataList)
                   }
+                  that.addDailyData('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv', dataList, 'confirmedDaily')
+                  that.addDailyData('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv', dataList, 'recoveredDaily')
+                  that.addDailyData('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv', dataList, 'deathsDaily')
                 }
               })
+              deferred.resolve(dataList)
             }
           })
 
@@ -188,14 +194,64 @@ export default {
 
       return ds
     },
+    addDailyData (ajaxUrl, dataList, attributeName) {
+      JQuery.ajax({
+        url: ajaxUrl,
+        async: false,
+        crossDomain: true,
+        accept: {
+          'Access-Control-Allow-Origin': '*'
+        },
+        success: function (result) {
+          const csvdata = Papa.parse(result)
+          for (var i = 1; i < csvdata.data.length - 1; i++) {
+            const isCompressRegion = (csvdata.data[i][1] === 'US' || csvdata.data[i][1] === 'China' ||
+                                  csvdata.data[i][1] === 'Canada' || csvdata.data[i][1] === 'Australia')
+
+            var regionName = ''
+            if (isCompressRegion) {
+              regionName = csvdata.data[i][1]
+            } else {
+              regionName = csvdata.data[i][0] ? csvdata.data[i][0] + ', ' : ''
+              regionName += csvdata.data[i][1]
+            }
+            const found = dataList.find((element) => element.attributes.region === regionName)
+            if (found) {
+              let lastvalue = 0
+              for (var j = 4; j < csvdata.data[i].length; j++) {
+                if (!found.attributes[attributeName][j - 4]) {
+                  found.attributes[attributeName][j - 4] = []
+                }
+
+                if (!found.attributes[attributeName][j - 4].value) {
+                  found.attributes[attributeName][j - 4].value = 0
+                }
+
+                if (!found.attributes[attributeName][j - 4].increase) {
+                  found.attributes[attributeName][j - 4].increase = 0
+                }
+
+                found.attributes[attributeName][j - 4].date = csvdata.data[0][j]
+                found.attributes[attributeName][j - 4].value += parseInt(csvdata.data[i][j])
+                found.attributes[attributeName][j - 4].increase += parseInt(csvdata.data[i][j]) - lastvalue
+                lastvalue = parseInt(csvdata.data[i][j])
+              }
+            }
+          }
+        }
+      })
+    },
     tooltipText (info) {
       if (info.layer.type === 'marker') {
+        var dailyConfirmed = info.attribute('confirmedDaily')[info.attribute('confirmedDaily').length - 1].increase
+        var dailyRecovered = info.attribute('recoveredDaily')[info.attribute('recoveredDaily').length - 1].increase
+        var dailyDeaths = info.attribute('deathsDaily')[info.attribute('deathsDaily').length - 1].increase
         return {
           text: '<b>' + info.attribute('region') + '</b>' +
-                '<br />&nbsp;<br />Confirmed: ' + info.attribute('confirmed') +
-                '<br />Recovered: ' + info.attribute('recovered') +
+                '<br />&nbsp;<br />Confirmed: ' + info.attribute('confirmed') + ' (' + dailyConfirmed + ')' +
+                '<br />Recovered: ' + info.attribute('recovered') + ' (' + dailyRecovered + ')' +
                 '<br />Active: ' + info.attribute('active') +
-                '<br />Deaths: ' + info.attribute('deaths')
+                '<br />Deaths: ' + info.attribute('deaths') + ' (' + dailyDeaths + ')'
         }
       }
     },
