@@ -10,13 +10,10 @@
 #region-name {
   margin:0;
 }
-/*#dx-card-vector-map {
-  position: absolute;
-  top: 5px;
-  bottom: 5px;
-  left: 5px;
-  right: 200px;
-}*/
+
+#totals-form {
+  margin-top: 5px;
+}
 
 .dx-card {
   margin: 5px;

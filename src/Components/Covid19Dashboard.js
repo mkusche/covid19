@@ -24,7 +24,13 @@ import { Chart,
   ArgumentAxis,
   Label as ChartLabel,
   Tooltip as ChartTooltip,
-  TickInterval } from 'devextreme-react/chart';
+  TickInterval 
+} from 'devextreme-react/chart';
+import Form, {
+  GroupItem,
+} from 'devextreme-react/form';
+import { TextBox } from 'devextreme-react';
+import { formatNumber } from 'devextreme/localization';
 
 import JQuery from 'jquery'
 import Papa from 'papaparse'
@@ -39,11 +45,23 @@ class Covid19Dashboard extends React.Component {
       confirmedDaily: [],
       recoveredDaily: [],
       deathsDaily: [],
-      regionName: worldRegionName
+      currentData: {
+        regionName: worldRegionName,
+        totalConfirmed: '0',
+        totalActive: '0',
+        totalRecovered: '0',
+        totalDeaths: '0',
+      }
     };
     this.confirmedDailyWorld = [];
     this.recoveredDailyWorld = [];
     this.deathsDailyWorld = [];
+    this.totalWorld = {
+      totalConfirmed: 0,
+        totalActive: 0,
+        totalRecovered: 0,
+        totalDeaths: 0,
+    };
 
 
     this.screen = (width) => width < 700 ? "sm" : "lg";
@@ -163,15 +181,27 @@ class Covid19Dashboard extends React.Component {
                       })
                     }
                   }
+
+                  that.totalWorld.totalConfirmed +=  parseInt(csvdata.data[i][7]);
+                  that.totalWorld.totalActive += parseInt(csvdata.data[i][10]);
+                  that.totalWorld.totalRecovered += parseInt(csvdata.data[i][9]);
+                  that.totalWorld.totalDeaths += parseInt(csvdata.data[i][8]);
                 }
                 that.confirmedDailyWorld = addDailyData('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv', dataList, 'confirmedDaily')
                 that.recoveredDailyWorld = addDailyData('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv', dataList, 'recoveredDaily')
                 that.deathsDailyWorld = addDailyData('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv', dataList, 'deathsDaily')
 
+                const current = that.state.currentData;
+                current.totalConfirmed = formatNumber(that.totalWorld.totalConfirmed);
+                current.totalActive = formatNumber(that.totalWorld.totalActive);
+                current.totalRecovered = formatNumber(that.totalWorld.totalRecovered);
+                current.totalDeaths = formatNumber(that.totalWorld.totalDeaths);
+
                 that.setState({
                   confirmedDaily: that.confirmedDailyWorld,
                   recoveredDaily: that.recoveredDailyWorld,
-                  deathsDaily: that.deathsDailyWorld
+                  deathsDaily: that.deathsDailyWorld,
+                  currentData: current
                 });
               }
             })
@@ -254,21 +284,21 @@ class Covid19Dashboard extends React.Component {
 
     this.tooltipText = (info) => {
       if (info.layer.type === 'marker') {
-        var dailyConfirmed = info.attribute('confirmedDaily')[info.attribute('confirmedDaily').length - 1].increase
-        var dailyRecovered = info.attribute('recoveredDaily')[info.attribute('recoveredDaily').length - 1].increase
-        var dailyDeaths = info.attribute('deathsDaily')[info.attribute('deathsDaily').length - 1].increase
+        var dailyConfirmed = formatNumber(parseInt(info.attribute('confirmedDaily')[info.attribute('confirmedDaily').length - 1].increase));
+        var dailyRecovered = formatNumber(parseInt(info.attribute('recoveredDaily')[info.attribute('recoveredDaily').length - 1].increase));
+        var dailyDeaths = formatNumber(parseInt(info.attribute('deathsDaily')[info.attribute('deathsDaily').length - 1].increase));
         return {
           text: '<b>' + info.attribute('region') + '</b>' +
-                '<br />&nbsp;<br />Confirmed: ' + info.attribute('confirmed') + ' (' + dailyConfirmed + ')' +
-                '<br />Recovered: ' + info.attribute('recovered') + ' (' + dailyRecovered + ')' +
-                '<br />Active: ' + info.attribute('active') +
-                '<br />Deaths: ' + info.attribute('deaths') + ' (' + dailyDeaths + ')'
+                '<br />&nbsp;<br />Confirmed: ' + formatNumber(parseInt(info.attribute('confirmed'))) + ' (' + dailyConfirmed + ')' +
+                '<br />Recovered: ' + formatNumber(parseInt(info.attribute('recovered'))) + ' (' + dailyRecovered + ')' +
+                '<br />Active: ' + formatNumber(parseInt(info.attribute('active'))) +
+                '<br />Deaths: ' + formatNumber(parseInt(info.attribute('deaths'))) + ' (' + dailyDeaths + ')'
         }
       }
     }
     
     this.chartTooltipText = (info) => {
-      return { text: info.argument.toLocaleDateString("en-US") + ': ' + info.value };
+      return { text: info.argument.toLocaleDateString("en-US") + ': ' + formatNumber(parseInt(info.value)) };
     }
 
     this.markerClick = (e) => {
@@ -276,14 +306,23 @@ class Covid19Dashboard extends React.Component {
       if (e.target && e.target.layer.type === 'marker') {
         e.component.center(e.target.coordinates()).zoomFactor(6);
         
+        
         const confirmedDaily = e.target.attribute('confirmedDaily');
         const recoveredDaily = e.target.attribute('recoveredDaily');
         const deathsDaily = e.target.attribute('deathsDaily');
+        
+        const current = this.state.currentData;
+        current.regionName = e.target.attribute('region');
+        current.totalConfirmed = formatNumber(parseInt(e.target.attribute('confirmed')));
+        current.totalActive = formatNumber(parseInt(e.target.attribute('active')));
+        current.totalRecovered = formatNumber(parseInt(e.target.attribute('recovered')));
+        current.totalDeaths= formatNumber(parseInt(e.target.attribute('deaths')));
+        console.log(current)
         this.setState({
           confirmedDaily: confirmedDaily,
           recoveredDaily: recoveredDaily,
           deathsDaily: deathsDaily,
-          regionName: e.target.attribute('region')
+          currentData: current
         });
       }
     }
@@ -291,11 +330,19 @@ class Covid19Dashboard extends React.Component {
     this.resetClick = () => {
       this.vectorMap.center(null);
       this.vectorMap.zoomFactor(null);
+
+      const current = this.state.currentData;
+      current.regionName = worldRegionName;
+      current.totalConfirmed = formatNumber(this.totalWorld.totalConfirmed);
+      current.totalActive = formatNumber(this.totalWorld.totalActive);
+      current.totalRecovered = formatNumber(this.totalWorld.totalRecovered);
+      current.totalDeaths = formatNumber(this.totalWorld.totalDeaths);
+
       this.setState({
         confirmedDaily: this.confirmedDailyWorld,
         recoveredDaily: this.recoveredDailyWorld,
         deathsDaily: this.deathsDailyWorld,
-        regionName: worldRegionName
+        currentData: current
       });
     };
   }
@@ -307,15 +354,15 @@ class Covid19Dashboard extends React.Component {
         <Row ratio={3} screen="xs" />
         <Row ratio={1} />
 
-        <Col ratio={1} />
+        <Col ratio={2} />
         <Col ratio={1} screen="lg" />
-
+        <Col ratio={0} screen="lg" />
         <ResponsiveBoxItem>
           <Location row={0} col={0} screen="lg" />
           <Location row={0} col={0} colspan={2} screen="sm" />
 
           <div className="dx-card responsive-paddings">
-            <div id="region"><h2 id="region-name">{this.state.regionName}</h2></div>
+            <div id="region"><h2 id="region-name">{this.state.currentData.regionName}</h2></div>
             <Button
               id="reset"
               text="Reset"
@@ -368,6 +415,46 @@ class Covid19Dashboard extends React.Component {
               <Tooltip enabled={true}
                 customizeTooltip={this.tooltipText} />
             </VectorMap>
+            <Form id="totals-form">
+              <GroupItem colCount={2}>
+                <GroupItem>
+                  <div className="dx-field">
+                    <div className="dx-field-label">Confirmed Cases</div>
+                    <div className="dx-field-value">
+                      <TextBox readOnly={true}
+                        hoverStateEnabled={false}
+                        value={this.state.currentData.totalConfirmed } />
+                    </div>
+                  </div>
+                  <div className="dx-field">
+                    <div className="dx-field-label">Active Cases</div>
+                    <div className="dx-field-value">
+                      <TextBox readOnly={true}
+                        hoverStateEnabled={false}
+                        value={this.state.currentData.totalActive } />
+                    </div>
+                  </div>
+                </GroupItem>
+                <GroupItem>
+                  <div className="dx-field">
+                    <div className="dx-field-label">Recovered Cases</div>
+                    <div className="dx-field-value">
+                      <TextBox readOnly={true}
+                        hoverStateEnabled={false}
+                        value={this.state.currentData.totalRecovered } />
+                    </div>
+                  </div>
+                  <div className="dx-field">
+                    <div className="dx-field-label">Deaths</div>
+                    <div className="dx-field-value">
+                      <TextBox readOnly={true}
+                        hoverStateEnabled={false}
+                        value={this.state.currentData.totalDeaths} />
+                    </div>
+                  </div>
+                </GroupItem>
+              </GroupItem>
+            </Form>
           </div>
         </ResponsiveBoxItem>
 
@@ -440,7 +527,7 @@ class Covid19Dashboard extends React.Component {
                     type="spline"
                     color="#ff3300" />
                     <Legend visible={false}></Legend>
-                    <ArgumentAxis type="logarithmic">
+                    <ArgumentAxis>
                       <TickInterval days={20} /> 
                       <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
                     </ArgumentAxis>
@@ -457,7 +544,7 @@ class Covid19Dashboard extends React.Component {
                     type="spline"
                     color="#149414" />
                     <Legend visible={false}></Legend>
-                    <ArgumentAxis type="logarithmic">
+                    <ArgumentAxis>
                       <TickInterval days={20} /> 
                       <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
                     </ArgumentAxis>
@@ -474,7 +561,7 @@ class Covid19Dashboard extends React.Component {
                     type="spline"
                     color="#000000" />
                     <Legend visible={false}></Legend>
-                    <ArgumentAxis type="logarithmic">
+                    <ArgumentAxis>
                       <TickInterval days={20} /> 
                       <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
                     </ArgumentAxis>
@@ -483,7 +570,7 @@ class Covid19Dashboard extends React.Component {
               </TabPanelItem>
             </TabPanel>
             <TabPanel>
-              <TabPanelItem title="Confirmed Logrithmic">
+              <TabPanelItem title="Confirmed Log.">
                 <Chart dataSource={this.state.confirmedDaily}>
                   <Size height={150} />
                   <Series
@@ -493,14 +580,14 @@ class Covid19Dashboard extends React.Component {
                     type="spline"
                     color="#ff3300" />
                     <Legend visible={false}></Legend>
-                    <ArgumentAxis type="logarithmic">
+                    <ArgumentAxis>
                       <TickInterval days={20} /> 
                       <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
                     </ArgumentAxis>
                     <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
                 </Chart>
               </TabPanelItem>
-              <TabPanelItem title="Recovered Logarhitmic">
+              <TabPanelItem title="Recovered Log.">
                 <Chart dataSource={this.state.recoveredDaily}>
                   <Size height={150} />
                   <Series
@@ -510,14 +597,14 @@ class Covid19Dashboard extends React.Component {
                     type="spline"
                     color="#149414" />
                     <Legend visible={false}></Legend>
-                    <ArgumentAxis type="logarithmic">
+                    <ArgumentAxis>
                       <TickInterval days={20} /> 
                       <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
                     </ArgumentAxis>
                     <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
                 </Chart>
               </TabPanelItem>
-              <TabPanelItem title="Deaths Logarithmic">
+              <TabPanelItem title="Deaths Log.">
                 <Chart dataSource={this.state.deathsDaily}>
                   <Size height={150} />
                   <Series
@@ -527,7 +614,7 @@ class Covid19Dashboard extends React.Component {
                     type="spline"
                     color="#000000" />
                     <Legend visible={false}></Legend>
-                    <ArgumentAxis type="logarithmic">
+                    <ArgumentAxis>
                       <TickInterval days={20} /> 
                       <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
                     </ArgumentAxis>
