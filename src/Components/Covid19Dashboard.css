@@ -1,0 +1,25 @@
+#reset {
+  padding: 5px;
+  margin: 5px;
+}
+
+#region {
+  text-align: center;
+}
+
+#region-name {
+  margin:0;
+}
+/*#dx-card-vector-map {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: 5px;
+  right: 200px;
+}*/
+
+.dx-card {
+  margin: 5px;
+  padding: 5px;
+  height: 100%;
+}
