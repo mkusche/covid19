@@ -3,7 +3,6 @@ import 'devextreme/dist/css/dx.light.css';
 import './Covid19Dashboard.css'
 import React from 'react';
 
-import DataSource from 'devextreme/data/data_source';
 import { Button } from 'devextreme-react';
 import ResponsiveBox, {
   Row,
@@ -16,6 +15,7 @@ import VectorMap, {
   Layer,
   Tooltip
 } from 'devextreme-react/vector-map';
+import DataGrid, { Column, Selection, Scrolling, Summary, TotalItem } from 'devextreme-react/data-grid';
 import { TabPanel, Item as TabPanelItem } from "devextreme-react/tab-panel";
 import { Chart,
   Series,
@@ -101,11 +101,10 @@ class Covid19Dashboard extends React.Component {
       return groupSize
     } ();
 
-    this.dataSource = new DataSource({
-      load: () => {
+    this.getData = () => {
+
         var that = this;
-        const deferred = JQuery.Deferred()
-  
+        const dataList = []
         JQuery.ajax({
           url: 'https://api.github.com/repos/CSSEGISandData/COVID-19/contents/csse_covid_19_data/csse_covid_19_daily_reports',
           async: false,
@@ -115,7 +114,7 @@ class Covid19Dashboard extends React.Component {
           },
           success: function (result) {
             const newestFile = result[result.length - 2]
-            const dataList = []
+            
             JQuery.ajax({
               url: newestFile.download_url,
               async: false,
@@ -134,7 +133,6 @@ class Covid19Dashboard extends React.Component {
                   if (isCompressRegion) {
                     regionName = csvdata.data[i][3]
                   } else {
-                    // regionName = csvdata.data[i][1] ? csvdata.data[i][1] + ', ' : ''
                     regionName += csvdata.data[i][2] ? csvdata.data[i][2] + ', ' : ''
                     regionName += csvdata.data[i][3]
                   }
@@ -200,21 +198,16 @@ class Covid19Dashboard extends React.Component {
                 current.totalRecovered = formatNumber(that.totalWorld.totalRecovered);
                 current.totalDeaths = formatNumber(that.totalWorld.totalDeaths);
 
-                that.setState({
-                  confirmedDaily: that.confirmedDailyWorld,
-                  recoveredDaily: that.recoveredDailyWorld,
-                  deathsDaily: that.deathsDailyWorld,
-                  currentData: current
-                });
+                that.state.confirmedDaily = that.confirmedDailyWorld;
+                that.state.recoveredDaily = that.recoveredDailyWorld;
+                that.state.deathsDaily = that.deathsDailyWorld;
+                that.state.currentData = current;
               }
             })
-            deferred.resolve(dataList)
           }
         })
-  
-        return deferred.promise()
-      }
-    });
+        return dataList;
+      };
   
     function addDailyData (ajaxUrl, dataList, attributeName) {
       const dailyWorldData = [];
@@ -366,9 +359,14 @@ class Covid19Dashboard extends React.Component {
       }
     };
 
+    this.summarizeGridText = (data) => {
+      return formatNumber(data.value);
+    };
+
     this.getRegions = (elements) => {
       this.mapRegions = elements;
     }
+    this.dataSource = this.getData();
   }
   
   render() {
@@ -485,6 +483,32 @@ class Covid19Dashboard extends React.Component {
                   </GroupItem>
                 </Form>
             </TabPanelItem>
+              <TabPanelItem title="Table">
+                <DataGrid
+                  id="gridContainer"
+                  dataSource={this.dataSource}
+                  showBorders={false}
+                  showColumnLines={false}
+                  showRowLines={false}
+                  focusedRowEnabled={true}
+                  rowAlternationEnabled={true}
+                  height="500"
+                  keyExpr="attributes.region">
+                  <Selection mode="single" />
+                  <Scrolling mode="virtual" />
+                  <Column dataField="attributes.region"  caption="Country" />
+                  <Column dataField="attributes.confirmed" width={100} caption="Confirmed" dataType="number" defaultSortOrder="desc"/>
+                  <Column dataField="attributes.recovered" width={100} caption="Recovered" dataType="number"/>
+                  <Column dataField="attributes.deaths" width={100} caption="Deaths" dataType="number"/>
+                  <Column dataField="attributes.active" width={100} caption="Active" dataType="number"/>
+                  <Summary>
+                    <TotalItem column="Confirmed" summaryType="sum" customizeText={this.summarizeGridText}/>
+                    <TotalItem column="Recovered" summaryType="sum" customizeText={this.summarizeGridText}/>
+                    <TotalItem column="Deaths" summaryType="sum" customizeText={this.summarizeGridText}/>
+                    <TotalItem column="Active" summaryType="sum" customizeText={this.summarizeGridText}/>
+                  </Summary>
+                </DataGrid>
+              </TabPanelItem>
             </TabPanel>
           </div>
         </ResponsiveBoxItem>
