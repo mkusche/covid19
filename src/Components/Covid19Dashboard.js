@@ -37,6 +37,7 @@ import Papa from 'papaparse'
 import * as mapsData from 'devextreme/dist/js/vectormap-data/world.js';
 
 const worldRegionName = "World"
+const mapcolor = '#D2D2D2';
 
 class Covid19Dashboard extends React.Component {
   constructor(props) {
@@ -53,15 +54,17 @@ class Covid19Dashboard extends React.Component {
         totalDeaths: '0',
       }
     };
+
     this.confirmedDailyWorld = [];
     this.recoveredDailyWorld = [];
     this.deathsDailyWorld = [];
     this.totalWorld = {
       totalConfirmed: 0,
-        totalActive: 0,
-        totalRecovered: 0,
-        totalDeaths: 0,
+      totalActive: 0,
+      totalRecovered: 0,
+      totalDeaths: 0,
     };
+    this.mapRegions= [];
 
 
     this.screen = (width) => width < 700 ? "sm" : "lg";
@@ -302,11 +305,9 @@ class Covid19Dashboard extends React.Component {
     }
 
     this.markerClick = (e) => {
-      
       if (e.target && e.target.layer.type === 'marker') {
         e.component.center(e.target.coordinates()).zoomFactor(6);
-        
-        
+
         const confirmedDaily = e.target.attribute('confirmedDaily');
         const recoveredDaily = e.target.attribute('recoveredDaily');
         const deathsDaily = e.target.attribute('deathsDaily');
@@ -317,13 +318,26 @@ class Covid19Dashboard extends React.Component {
         current.totalActive = formatNumber(parseInt(e.target.attribute('active')));
         current.totalRecovered = formatNumber(parseInt(e.target.attribute('recovered')));
         current.totalDeaths= formatNumber(parseInt(e.target.attribute('deaths')));
-        console.log(current)
+
         this.setState({
           confirmedDaily: confirmedDaily,
           recoveredDaily: recoveredDaily,
           deathsDaily: deathsDaily,
           currentData: current
         });
+
+        for(let i = 0; i < this.mapRegions.length; i++) {
+          if(e.target.attribute('region') === this.mapRegions[i].attribute("name")) {
+            this.mapRegions[i].applySettings({
+              color: '#FFAE42',
+            });
+            //break;
+          } else {
+            this.mapRegions[i].applySettings({
+              color: mapcolor,
+            });
+          }
+        }
       }
     }
 
@@ -344,7 +358,17 @@ class Covid19Dashboard extends React.Component {
         deathsDaily: this.deathsDailyWorld,
         currentData: current
       });
+
+      for(let i = 0; i < this.mapRegions.length; i++) {
+        this.mapRegions[i].applySettings({
+          color: mapcolor,
+        });
+      }
     };
+
+    this.getRegions = (elements) => {
+      this.mapRegions = elements;
+    }
   }
   
   render() {
@@ -367,94 +391,101 @@ class Covid19Dashboard extends React.Component {
               id="reset"
               text="Reset"
               onClick={this.resetClick}/>
-            <VectorMap
-              id="vector-map"
-              ref={this.storeVectorMap}
-              bounds={this.bounds}
-              onClick={this.markerClick}>
-              <Layer
-                dataSource={mapsData.world}
-                hoverEnabled={false}>
-              </Layer>
-              <Layer
-                dataSource={this.dataSource}
-                name="bubbles"
-                elementType="bubble"
-                dataField="confirmed"
-                minSize={5}
-                maxSize={100}
-                opacity="0.8"
-                sizeGroups={this.sizeGroups}
-                color="#ff3300">
-                <Label enabled={false}></Label>
-              </Layer>
-              <Layer
-                dataSource={this.dataSource}
-                name="bubbles"
-                elementType="bubble"
-                dataField="recovered"
-                minSize={1}
-                maxSize={100}
-                opacity="0.8"
-                sizeGroups={this.sizeGroups}
-                color="#149414">
-                <Label enabled={false}></Label>
-              </Layer>
-              <Layer
-                dataSource={this.dataSource}
-                name="bubbles"
-                elementType="bubble"
-                dataField="deaths"
-                minSize={1}
-                maxSize={100}
-                opacity="0.8"
-                sizeGroups={this.sizeGroups}
-                color="#000000">
-                <Label enabled={false}></Label>
-              </Layer>
-              <Tooltip enabled={true}
-                customizeTooltip={this.tooltipText} />
-            </VectorMap>
-            <Form id="totals-form">
-              <GroupItem colCount={2}>
-                <GroupItem>
-                  <div className="dx-field">
-                    <div className="dx-field-label">Confirmed Cases</div>
-                    <div className="dx-field-value">
-                      <TextBox readOnly={true}
-                        hoverStateEnabled={false}
-                        value={this.state.currentData.totalConfirmed } />
-                    </div>
-                  </div>
-                  <div className="dx-field">
-                    <div className="dx-field-label">Active Cases</div>
-                    <div className="dx-field-value">
-                      <TextBox readOnly={true}
-                        hoverStateEnabled={false}
-                        value={this.state.currentData.totalActive } />
-                    </div>
-                  </div>
-                </GroupItem>
-                <GroupItem>
-                  <div className="dx-field">
-                    <div className="dx-field-label">Recovered Cases</div>
-                    <div className="dx-field-value">
-                      <TextBox readOnly={true}
-                        hoverStateEnabled={false}
-                        value={this.state.currentData.totalRecovered } />
-                    </div>
-                  </div>
-                  <div className="dx-field">
-                    <div className="dx-field-label">Deaths</div>
-                    <div className="dx-field-value">
-                      <TextBox readOnly={true}
-                        hoverStateEnabled={false}
-                        value={this.state.currentData.totalDeaths} />
-                    </div>
-                  </div>
-                </GroupItem>
-              </GroupItem>
-            </Form>
+            <TabPanel className="tab-panel">
+              <TabPanelItem title="World Map">
+                <VectorMap
+                  id="vector-map"
+                  ref={this.storeVectorMap}
+                  bounds={this.bounds}
+                  onClick={this.markerClick}
+                  >
+                  <Layer
+                    dataSource={mapsData.world}
+                    hoverEnabled={false}
+                    customize={this.getRegions}
+                    color={mapcolor}>
+                  </Layer>
+                  <Layer
+                    dataSource={this.dataSource}
+                    name="bubbles"
+                    elementType="bubble"
+                    dataField="confirmed"
+                    minSize={5}
+                    maxSize={100}
+                    opacity="0.8"
+                    sizeGroups={this.sizeGroups}
+                    color="#ff3300">
+                    <Label enabled={false}></Label>
+                  </Layer>
+                  <Layer
+                    dataSource={this.dataSource}
+                    name="bubbles"
+                    elementType="bubble"
+                    dataField="recovered"
+                    minSize={1}
+                    maxSize={100}
+                    opacity="0.8"
+                    sizeGroups={this.sizeGroups}
+                    color="#149414">
+                    <Label enabled={false}></Label>
+                  </Layer>
+                  <Layer
+                    dataSource={this.dataSource}
+                    name="bubbles"
+                    elementType="bubble"
+                    dataField="deaths"
+                    minSize={1}
+                    maxSize={100}
+                    opacity="0.8"
+                    sizeGroups={this.sizeGroups}
+                    color="#000000">
+                    <Label enabled={false}></Label>
+                  </Layer>
+                  <Tooltip enabled={true}
+                    customizeTooltip={this.tooltipText} />
+                </VectorMap>
+                <Form id="totals-form">
+                  <GroupItem colCount={2}>
+                    <GroupItem>
+                      <div className="dx-field">
+                        <div className="dx-field-label">Confirmed Cases</div>
+                        <div className="dx-field-value">
+                          <TextBox readOnly={true}
+                            hoverStateEnabled={false}
+                            value={this.state.currentData.totalConfirmed } />
+                        </div>
+                      </div>
+                      <div className="dx-field">
+                        <div className="dx-field-label">Active Cases</div>
+                        <div className="dx-field-value">
+                          <TextBox readOnly={true}
+                            hoverStateEnabled={false}
+                            value={this.state.currentData.totalActive } />
+                        </div>
+                      </div>
+                    </GroupItem>
+                    <GroupItem>
+                      <div className="dx-field">
+                        <div className="dx-field-label">Recovered Cases</div>
+                        <div className="dx-field-value">
+                          <TextBox readOnly={true}
+                            hoverStateEnabled={false}
+                            value={this.state.currentData.totalRecovered } />
+                        </div>
+                      </div>
+                      <div className="dx-field">
+                        <div className="dx-field-label">Deaths</div>
+                        <div className="dx-field-value">
+                          <TextBox readOnly={true}
+                            hoverStateEnabled={false}
+                            value={this.state.currentData.totalDeaths} />
+                        </div>
+                      </div>
+                    </GroupItem>
+                  </GroupItem>
+                </Form>
+            </TabPanelItem>
+            </TabPanel>
           </div>
         </ResponsiveBoxItem>
 
@@ -463,7 +494,7 @@ class Covid19Dashboard extends React.Component {
           <Location row={1} col={0} colspan={2} screen="sm" />
 
           <div className="dx-card responsive-paddings">
-            <TabPanel>
+            <TabPanel className="tab-panel">
               <TabPanelItem title="Confirmed Daily">
                 <Chart dataSource={this.state.confirmedDaily}>
                   <Size height={150} />
@@ -516,7 +547,7 @@ class Covid19Dashboard extends React.Component {
                 </Chart>
               </TabPanelItem>
             </TabPanel>
-            <TabPanel>
+            <TabPanel className="tab-panel">
               <TabPanelItem title="Confirmed Linear">
                 <Chart dataSource={this.state.confirmedDaily}>
                   <Size height={150} />
@@ -569,7 +600,7 @@ class Covid19Dashboard extends React.Component {
                 </Chart>
               </TabPanelItem>
             </TabPanel>
-            <TabPanel>
+            <TabPanel className="tab-panel">
               <TabPanelItem title="Confirmed Log.">
                 <Chart dataSource={this.state.confirmedDaily}>
                   <Size height={150} />

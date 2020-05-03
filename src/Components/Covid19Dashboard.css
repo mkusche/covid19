@@ -1,18 +1,30 @@
 #reset {
-  padding: 5px;
   margin: 5px;
+  padding: 2px;
+  position: absolute;
+  top: 5px;
 }
 
 #region {
   text-align: center;
+  margin-bottom: 10px;
 }
 
 #region-name {
+  padding-top: 2px;
   margin:0;
 }
 
+#vector-map {
+  margin: 5px;
+}
+
 #totals-form {
-  margin-top: 5px;
+  margin: 5px;
+}
+
+.tab-panel {
+  margin-bottom: 5px;
 }
 
 .dx-card {
