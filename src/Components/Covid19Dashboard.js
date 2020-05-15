@@ -35,6 +35,7 @@ import { formatNumber } from 'devextreme/localization';
 import JQuery from 'jquery'
 import Papa from 'papaparse'
 import * as mapsData from 'devextreme/dist/js/vectormap-data/world.js';
+import germanyMapsData from '../maps/germany.geojson'
 
 const worldRegionName = "World"
 const mapcolor = '#D2D2D2';
@@ -126,7 +127,9 @@ class Covid19Dashboard extends React.Component {
                 const csvdata = Papa.parse(result)
                 for (var i = 1; i < csvdata.data.length - 1; i++) {
                   const isCompressRegion = (csvdata.data[i][3] === 'US' || csvdata.data[i][3] === 'China' ||
-                                            csvdata.data[i][3] === 'Canada' || csvdata.data[i][3] === 'Australia')
+                                            csvdata.data[i][3] === 'Canada' || csvdata.data[i][3] === 'Australia' ||
+                                            csvdata.data[i][3] === 'Germany' || csvdata.data[i][3] === 'Italy' ||
+                                            csvdata.data[i][3] === 'Spain')
   
                   let regionName = ''
   
@@ -164,6 +167,21 @@ class Covid19Dashboard extends React.Component {
                     if (regionName === 'Australia') {
                       lat = -23.7
                       long = 132.8
+                    }
+
+                    if (regionName === 'Germany') {
+                      lat = 51.2
+                      long = 10.5
+                    }
+
+                    if (regionName === 'Italy') {
+                      lat = 41.9
+                      long = 12.6
+                    }
+
+                    if (regionName === 'Spain') {
+                      lat = 40.5
+                      long = -3.7
                     }
   
                     if (!isNaN(lat)) {
@@ -223,7 +241,9 @@ class Covid19Dashboard extends React.Component {
           const csvdata = Papa.parse(result)
           for (var i = 1; i < csvdata.data.length - 1; i++) {
             const isCompressRegion = (csvdata.data[i][1] === 'US' || csvdata.data[i][1] === 'China' ||
-                                  csvdata.data[i][1] === 'Canada' || csvdata.data[i][1] === 'Australia')
+                                  csvdata.data[i][1] === 'Canada' || csvdata.data[i][1] === 'Australia' ||
+                                  csvdata.data[i][3] === 'Germany' || csvdata.data[i][3] === 'Italy' ||
+                                  csvdata.data[i][3] === 'Spain')
     
             var regionName = ''
             if (isCompressRegion) {
@@ -371,323 +391,334 @@ class Covid19Dashboard extends React.Component {
   
   render() {
     return (
-      <ResponsiveBox singleColumnScreen="sm" id="responsice-box" screenByWidth={this.screen} height={() => window.innerHeight}>
-        <Row ratio={3} />
-        <Row ratio={3} screen="xs" />
-        <Row ratio={1} />
+      <React.Fragment>
+        <ResponsiveBox singleColumnScreen="sm" id="responsice-box" screenByWidth={this.screen} height={() => window.innerHeight}>
+          <Row ratio={3} />
+          <Row ratio={3} screen="xs" />
+          <Row ratio={1} />
 
-        <Col ratio={2} />
-        <Col ratio={1} screen="lg" />
-        <Col ratio={0} screen="lg" />
-        <ResponsiveBoxItem>
-          <Location row={0} col={0} screen="lg" />
-          <Location row={0} col={0} colspan={2} screen="sm" />
+          <Col ratio={2} />
+          <Col ratio={1} screen="lg" />
+          <Col ratio={0} screen="lg" />
+          <ResponsiveBoxItem>
+            <Location row={0} col={0} screen="lg" />
+            <Location row={0} col={0} colspan={2} screen="sm" />
 
-          <div className="dx-card responsive-paddings">
-            <div id="region"><h2 id="region-name">{this.state.currentData.regionName}</h2></div>
-            <Button
-              id="reset"
-              text="Reset"
-              onClick={this.resetClick}/>
-            <TabPanel className="tab-panel">
-              <TabPanelItem title="World Map">
-                <VectorMap
-                  id="vector-map"
-                  ref={this.storeVectorMap}
-                  bounds={this.bounds}
-                  onClick={this.markerClick}
-                  >
-                  <Layer
-                    dataSource={mapsData.world}
-                    hoverEnabled={false}
-                    customize={this.getRegions}
-                    color={mapcolor}>
-                  </Layer>
-                  <Layer
-                    dataSource={this.dataSource}
-                    name="bubbles"
-                    elementType="bubble"
-                    dataField="confirmed"
-                    minSize={5}
-                    maxSize={100}
-                    opacity="0.8"
-                    sizeGroups={this.sizeGroups}
-                    color="#ff3300">
-                    <Label enabled={false}></Label>
-                  </Layer>
-                  <Layer
-                    dataSource={this.dataSource}
-                    name="bubbles"
-                    elementType="bubble"
-                    dataField="recovered"
-                    minSize={1}
-                    maxSize={100}
-                    opacity="0.8"
-                    sizeGroups={this.sizeGroups}
-                    color="#149414">
-                    <Label enabled={false}></Label>
-                  </Layer>
-                  <Layer
-                    dataSource={this.dataSource}
-                    name="bubbles"
-                    elementType="bubble"
-                    dataField="deaths"
-                    minSize={1}
-                    maxSize={100}
-                    opacity="0.8"
-                    sizeGroups={this.sizeGroups}
-                    color="#000000">
-                    <Label enabled={false}></Label>
-                  </Layer>
-                  <Tooltip enabled={true}
-                    customizeTooltip={this.tooltipText} />
-                </VectorMap>
-                <Form id="totals-form">
-                  <GroupItem colCount={2}>
-                    <GroupItem>
-                      <div className="dx-field">
-                        <div className="dx-field-label">Confirmed Cases</div>
-                        <div className="dx-field-value">
-                          <TextBox readOnly={true}
-                            hoverStateEnabled={false}
-                            value={this.state.currentData.totalConfirmed } />
+            <div className="dx-card responsive-paddings">
+              <div id="region"><h2 id="region-name">{this.state.currentData.regionName}</h2></div>
+              <Button
+                id="reset"
+                text="Reset"
+                onClick={this.resetClick}/>
+              <TabPanel className="tab-panel">
+                <TabPanelItem title="World Map">
+                  <VectorMap
+                    id="vector-map"
+                    ref={this.storeVectorMap}
+                    bounds={this.bounds}
+                    onClick={this.markerClick}
+                    >
+                    <Layer
+                      dataSource={mapsData.world}
+                      hoverEnabled={false}
+                      customize={this.getRegions}
+                      color={mapcolor}>
+                    </Layer>
+                    <Layer
+                      dataSource={this.dataSource}
+                      name="bubbles"
+                      elementType="bubble"
+                      dataField="confirmed"
+                      minSize={5}
+                      maxSize={100}
+                      opacity="0.8"
+                      sizeGroups={this.sizeGroups}
+                      color="#ff3300">
+                      <Label enabled={false}></Label>
+                    </Layer>
+                    <Layer
+                      dataSource={this.dataSource}
+                      name="bubbles"
+                      elementType="bubble"
+                      dataField="recovered"
+                      minSize={1}
+                      maxSize={100}
+                      opacity="0.8"
+                      sizeGroups={this.sizeGroups}
+                      color="#149414">
+                      <Label enabled={false}></Label>
+                    </Layer>
+                    <Layer
+                      dataSource={this.dataSource}
+                      name="bubbles"
+                      elementType="bubble"
+                      dataField="deaths"
+                      minSize={1}
+                      maxSize={100}
+                      opacity="0.8"
+                      sizeGroups={this.sizeGroups}
+                      color="#000000">
+                      <Label enabled={false}></Label>
+                    </Layer>
+                    <Tooltip enabled={true}
+                      customizeTooltip={this.tooltipText} />
+                  </VectorMap>
+                  <Form id="totals-form">
+                    <GroupItem colCount={2}>
+                      <GroupItem>
+                        <div className="dx-field">
+                          <div className="dx-field-label">Confirmed Cases</div>
+                          <div className="dx-field-value">
+                            <TextBox readOnly={true}
+                              hoverStateEnabled={false}
+                              value={this.state.currentData.totalConfirmed } />
+                          </div>
                         </div>
-                      </div>
-                      <div className="dx-field">
-                        <div className="dx-field-label">Active Cases</div>
-                        <div className="dx-field-value">
-                          <TextBox readOnly={true}
-                            hoverStateEnabled={false}
-                            value={this.state.currentData.totalActive } />
+                        <div className="dx-field">
+                          <div className="dx-field-label">Active Cases</div>
+                          <div className="dx-field-value">
+                            <TextBox readOnly={true}
+                              hoverStateEnabled={false}
+                              value={this.state.currentData.totalActive } />
+                          </div>
                         </div>
-                      </div>
+                      </GroupItem>
+                      <GroupItem>
+                        <div className="dx-field">
+                          <div className="dx-field-label">Recovered Cases</div>
+                          <div className="dx-field-value">
+                            <TextBox readOnly={true}
+                              hoverStateEnabled={false}
+                              value={this.state.currentData.totalRecovered } />
+                          </div>
+                        </div>
+                        <div className="dx-field">
+                          <div className="dx-field-label">Deaths</div>
+                          <div className="dx-field-value">
+                            <TextBox readOnly={true}
+                              hoverStateEnabled={false}
+                              value={this.state.currentData.totalDeaths} />
+                          </div>
+                        </div>
+                      </GroupItem>
                     </GroupItem>
-                    <GroupItem>
-                      <div className="dx-field">
-                        <div className="dx-field-label">Recovered Cases</div>
-                        <div className="dx-field-value">
-                          <TextBox readOnly={true}
-                            hoverStateEnabled={false}
-                            value={this.state.currentData.totalRecovered } />
-                        </div>
-                      </div>
-                      <div className="dx-field">
-                        <div className="dx-field-label">Deaths</div>
-                        <div className="dx-field-value">
-                          <TextBox readOnly={true}
-                            hoverStateEnabled={false}
-                            value={this.state.currentData.totalDeaths} />
-                        </div>
-                      </div>
-                    </GroupItem>
-                  </GroupItem>
-                </Form>
-            </TabPanelItem>
-              <TabPanelItem title="Table">
-                <DataGrid
-                  id="gridContainer"
-                  dataSource={this.dataSource}
-                  showBorders={false}
-                  showColumnLines={false}
-                  showRowLines={false}
-                  focusedRowEnabled={true}
-                  rowAlternationEnabled={true}
-                  height="500"
-                  keyExpr="attributes.region">
-                  <Selection mode="single" />
-                  <Scrolling mode="virtual" />
-                  <Column dataField="attributes.region"  caption="Country" />
-                  <Column dataField="attributes.confirmed" width={100} caption="Confirmed" dataType="number" defaultSortOrder="desc"/>
-                  <Column dataField="attributes.recovered" width={100} caption="Recovered" dataType="number"/>
-                  <Column dataField="attributes.deaths" width={100} caption="Deaths" dataType="number"/>
-                  <Column dataField="attributes.active" width={100} caption="Active" dataType="number"/>
-                  <Summary>
-                    <TotalItem column="Confirmed" summaryType="sum" customizeText={this.summarizeGridText}/>
-                    <TotalItem column="Recovered" summaryType="sum" customizeText={this.summarizeGridText}/>
-                    <TotalItem column="Deaths" summaryType="sum" customizeText={this.summarizeGridText}/>
-                    <TotalItem column="Active" summaryType="sum" customizeText={this.summarizeGridText}/>
-                  </Summary>
-                </DataGrid>
+                  </Form>
               </TabPanelItem>
-            </TabPanel>
-          </div>
-        </ResponsiveBoxItem>
+                <TabPanelItem title="Table">
+                  <DataGrid
+                    id="gridContainer"
+                    dataSource={this.dataSource}
+                    showBorders={false}
+                    showColumnLines={false}
+                    showRowLines={false}
+                    focusedRowEnabled={true}
+                    rowAlternationEnabled={true}
+                    height="500"
+                    keyExpr="attributes.region">
+                    <Selection mode="single" />
+                    <Scrolling mode="virtual" />
+                    <Column dataField="attributes.region"  caption="Country" />
+                    <Column dataField="attributes.confirmed" width={100} caption="Confirmed" dataType="number" defaultSortOrder="desc"/>
+                    <Column dataField="attributes.recovered" width={100} caption="Recovered" dataType="number"/>
+                    <Column dataField="attributes.deaths" width={100} caption="Deaths" dataType="number"/>
+                    <Column dataField="attributes.active" width={100} caption="Active" dataType="number"/>
+                    <Summary>
+                      <TotalItem column="Confirmed" summaryType="sum" customizeText={this.summarizeGridText}/>
+                      <TotalItem column="Recovered" summaryType="sum" customizeText={this.summarizeGridText}/>
+                      <TotalItem column="Deaths" summaryType="sum" customizeText={this.summarizeGridText}/>
+                      <TotalItem column="Active" summaryType="sum" customizeText={this.summarizeGridText}/>
+                    </Summary>
+                  </DataGrid>
+                </TabPanelItem>
+                <TabPanelItem title="Germany Map">
+                  <VectorMap
+                    id="vector-map-germany"
+                    bounds={this.bounds}
+                    >
+                    <Layer dataSource={germanyMapsData}>
+                    </Layer>
+                  </VectorMap>
+                </TabPanelItem>
+              </TabPanel>
+            </div>
+          </ResponsiveBoxItem>
 
-        <ResponsiveBoxItem>
-          <Location row={0} col={1} screen="lg" />
-          <Location row={1} col={0} colspan={2} screen="sm" />
+          <ResponsiveBoxItem>
+            <Location row={0} col={1} screen="lg" />
+            <Location row={1} col={0} colspan={2} screen="sm" />
 
-          <div className="dx-card responsive-paddings">
-            <TabPanel className="tab-panel">
-              <TabPanelItem title="Confirmed Daily">
-                <Chart dataSource={this.state.confirmedDaily}>
-                  <Size height={150} />
-                  <Series
-                    valueField="increase"
-                    argumentField="date"
-                    barPadding={0}
-                    type="bar"
-                    color="#ff3300" />
-                    <Legend visible={false}></Legend>
-                    <ArgumentAxis>
-                      <TickInterval days={20} /> 
-                      <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
-                    </ArgumentAxis>
-                    <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
-                </Chart>
-              </TabPanelItem>
-              <TabPanelItem title="Recovered Daily">
-                <Chart dataSource={this.state.recoveredDaily}>
-                  <Size height={150} />
-                  <Series
-                    valueField="increase"
-                    argumentField="date"
-                    barPadding={0}
-                    type="bar"
-                    color="#149414" />
-                    <Legend visible={false}></Legend>
-                    <ArgumentAxis>
-                      <TickInterval days={20} /> 
-                      <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
-                    </ArgumentAxis>
-                    <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
-                </Chart>
-              </TabPanelItem>
-              <TabPanelItem title="Deaths Daily">
-                <Chart dataSource={this.state.deathsDaily}>
-                  <Size height={150} />
-                  <Series
-                    valueField="increase"
-                    argumentField="date"
-                    barPadding={0}
-                    type="bar"
-                    color="#000000" />
-                    <Legend visible={false}></Legend>
-                    <ArgumentAxis>
-                      <TickInterval days={20} /> 
-                      <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
-                    </ArgumentAxis>
-                    <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
-                </Chart>
-              </TabPanelItem>
-            </TabPanel>
-            <TabPanel className="tab-panel">
-              <TabPanelItem title="Confirmed Linear">
-                <Chart dataSource={this.state.confirmedDaily}>
-                  <Size height={150} />
-                  <Series
-                    valueField="value"
-                    argumentField="date"
-                    barPadding={0}
-                    type="spline"
-                    color="#ff3300" />
-                    <Legend visible={false}></Legend>
-                    <ArgumentAxis>
-                      <TickInterval days={20} /> 
-                      <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
-                    </ArgumentAxis>
-                    <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
-                </Chart>
-              </TabPanelItem>
-              <TabPanelItem title="Recovered Linear">
-                <Chart dataSource={this.state.recoveredDaily}>
-                  <Size height={150} />
-                  <Series
-                    valueField="value"
-                    argumentField="date"
-                    barPadding={0}
-                    type="spline"
-                    color="#149414" />
-                    <Legend visible={false}></Legend>
-                    <ArgumentAxis>
-                      <TickInterval days={20} /> 
-                      <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
-                    </ArgumentAxis>
-                    <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
-                </Chart>
-              </TabPanelItem>
-              <TabPanelItem title="Deaths Linear">
-                <Chart dataSource={this.state.deathsDaily}>
-                  <Size height={150} />
-                  <Series
-                    valueField="value"
-                    argumentField="date"
-                    barPadding={0}
-                    type="spline"
-                    color="#000000" />
-                    <Legend visible={false}></Legend>
-                    <ArgumentAxis>
-                      <TickInterval days={20} /> 
-                      <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
-                    </ArgumentAxis>
-                    <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
-                </Chart>
-              </TabPanelItem>
-            </TabPanel>
-            <TabPanel className="tab-panel">
-              <TabPanelItem title="Confirmed Log.">
-                <Chart dataSource={this.state.confirmedDaily}>
-                  <Size height={150} />
-                  <Series
-                    valueField="valueLog"
-                    argumentField="date"
-                    barPadding={0}
-                    type="spline"
-                    color="#ff3300" />
-                    <Legend visible={false}></Legend>
-                    <ArgumentAxis>
-                      <TickInterval days={20} /> 
-                      <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
-                    </ArgumentAxis>
-                    <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
-                </Chart>
-              </TabPanelItem>
-              <TabPanelItem title="Recovered Log.">
-                <Chart dataSource={this.state.recoveredDaily}>
-                  <Size height={150} />
-                  <Series
-                    valueField="valueLog"
-                    argumentField="date"
-                    barPadding={0}
-                    type="spline"
-                    color="#149414" />
-                    <Legend visible={false}></Legend>
-                    <ArgumentAxis>
-                      <TickInterval days={20} /> 
-                      <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
-                    </ArgumentAxis>
-                    <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
-                </Chart>
-              </TabPanelItem>
-              <TabPanelItem title="Deaths Log.">
-                <Chart dataSource={this.state.deathsDaily}>
-                  <Size height={150} />
-                  <Series
-                    valueField="valueLog"
-                    argumentField="date"
-                    barPadding={0}
-                    type="spline"
-                    color="#000000" />
-                    <Legend visible={false}></Legend>
-                    <ArgumentAxis>
-                      <TickInterval days={20} /> 
-                      <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
-                    </ArgumentAxis>
-                    <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
-                </Chart>
-              </TabPanelItem>
-            </TabPanel>
-          </div>
-        </ResponsiveBoxItem>
+            <div className="dx-card responsive-paddings">
+              <TabPanel className="tab-panel">
+                <TabPanelItem title="Confirmed Daily">
+                  <Chart dataSource={this.state.confirmedDaily}>
+                    <Size height={150} />
+                    <Series
+                      valueField="increase"
+                      argumentField="date"
+                      barPadding={0}
+                      type="bar"
+                      color="#ff3300" />
+                      <Legend visible={false}></Legend>
+                      <ArgumentAxis>
+                        <TickInterval days={20} /> 
+                        <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
+                      </ArgumentAxis>
+                      <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
+                  </Chart>
+                </TabPanelItem>
+                <TabPanelItem title="Recovered Daily">
+                  <Chart dataSource={this.state.recoveredDaily}>
+                    <Size height={150} />
+                    <Series
+                      valueField="increase"
+                      argumentField="date"
+                      barPadding={0}
+                      type="bar"
+                      color="#149414" />
+                      <Legend visible={false}></Legend>
+                      <ArgumentAxis>
+                        <TickInterval days={20} /> 
+                        <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
+                      </ArgumentAxis>
+                      <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
+                  </Chart>
+                </TabPanelItem>
+                <TabPanelItem title="Deaths Daily">
+                  <Chart dataSource={this.state.deathsDaily}>
+                    <Size height={150} />
+                    <Series
+                      valueField="increase"
+                      argumentField="date"
+                      barPadding={0}
+                      type="bar"
+                      color="#000000" />
+                      <Legend visible={false}></Legend>
+                      <ArgumentAxis>
+                        <TickInterval days={20} /> 
+                        <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
+                      </ArgumentAxis>
+                      <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
+                  </Chart>
+                </TabPanelItem>
+              </TabPanel>
+              <TabPanel className="tab-panel">
+                <TabPanelItem title="Confirmed Linear">
+                  <Chart dataSource={this.state.confirmedDaily}>
+                    <Size height={150} />
+                    <Series
+                      valueField="value"
+                      argumentField="date"
+                      barPadding={0}
+                      type="spline"
+                      color="#ff3300" />
+                      <Legend visible={false}></Legend>
+                      <ArgumentAxis>
+                        <TickInterval days={20} /> 
+                        <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
+                      </ArgumentAxis>
+                      <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
+                  </Chart>
+                </TabPanelItem>
+                <TabPanelItem title="Recovered Linear">
+                  <Chart dataSource={this.state.recoveredDaily}>
+                    <Size height={150} />
+                    <Series
+                      valueField="value"
+                      argumentField="date"
+                      barPadding={0}
+                      type="spline"
+                      color="#149414" />
+                      <Legend visible={false}></Legend>
+                      <ArgumentAxis>
+                        <TickInterval days={20} /> 
+                        <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
+                      </ArgumentAxis>
+                      <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
+                  </Chart>
+                </TabPanelItem>
+                <TabPanelItem title="Deaths Linear">
+                  <Chart dataSource={this.state.deathsDaily}>
+                    <Size height={150} />
+                    <Series
+                      valueField="value"
+                      argumentField="date"
+                      barPadding={0}
+                      type="spline"
+                      color="#000000" />
+                      <Legend visible={false}></Legend>
+                      <ArgumentAxis>
+                        <TickInterval days={20} /> 
+                        <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
+                      </ArgumentAxis>
+                      <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
+                  </Chart>
+                </TabPanelItem>
+              </TabPanel>
+              <TabPanel className="tab-panel">
+                <TabPanelItem title="Confirmed Log.">
+                  <Chart dataSource={this.state.confirmedDaily}>
+                    <Size height={150} />
+                    <Series
+                      valueField="valueLog"
+                      argumentField="date"
+                      barPadding={0}
+                      type="spline"
+                      color="#ff3300" />
+                      <Legend visible={false}></Legend>
+                      <ArgumentAxis>
+                        <TickInterval days={20} /> 
+                        <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
+                      </ArgumentAxis>
+                      <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
+                  </Chart>
+                </TabPanelItem>
+                <TabPanelItem title="Recovered Log.">
+                  <Chart dataSource={this.state.recoveredDaily}>
+                    <Size height={150} />
+                    <Series
+                      valueField="valueLog"
+                      argumentField="date"
+                      barPadding={0}
+                      type="spline"
+                      color="#149414" />
+                      <Legend visible={false}></Legend>
+                      <ArgumentAxis>
+                        <TickInterval days={20} /> 
+                        <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
+                      </ArgumentAxis>
+                      <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
+                  </Chart>
+                </TabPanelItem>
+                <TabPanelItem title="Deaths Log.">
+                  <Chart dataSource={this.state.deathsDaily}>
+                    <Size height={150} />
+                    <Series
+                      valueField="valueLog"
+                      argumentField="date"
+                      barPadding={0}
+                      type="spline"
+                      color="#000000" />
+                      <Legend visible={false}></Legend>
+                      <ArgumentAxis>
+                        <TickInterval days={20} /> 
+                        <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
+                      </ArgumentAxis>
+                      <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
+                  </Chart>
+                </TabPanelItem>
+              </TabPanel>
+            </div>
+          </ResponsiveBoxItem>
 
-        <ResponsiveBoxItem>
-          <Location row={1} col={0} screen="lg" />
-          <Location row={2} col={0} screen="sm" />
+          <ResponsiveBoxItem>
+            <Location row={1} col={0} screen="lg" />
+            <Location row={2} col={0} screen="sm" />
 
-          <div>Datasource: <a href="https://github.com/CSSEGISandData/COVID-19">Johns Hopkins CSSE</a></div>
-        </ResponsiveBoxItem>
+            <div>Datasource: <a href="https://github.com/CSSEGISandData/COVID-19">Johns Hopkins CSSE</a></div>
+          </ResponsiveBoxItem>
 
-      </ResponsiveBox>
+        </ResponsiveBox>
+      </React.Fragment>
     );
   }
 }
