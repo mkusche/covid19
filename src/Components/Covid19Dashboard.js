@@ -32,12 +32,11 @@ import Form, {
 import { TextBox } from 'devextreme-react';
 import { formatNumber } from 'devextreme/localization';
 
-import JQuery from 'jquery'
-import Papa from 'papaparse'
+import JQuery from 'jquery';
+import Papa from 'papaparse';
 import * as mapsData from 'devextreme/dist/js/vectormap-data/world.js';
-import germanyMapsData from '../maps/germany.geojson'
 
-const worldRegionName = "World"
+const worldRegionName = "World";
 const mapcolor = '#D2D2D2';
 
 class Covid19Dashboard extends React.Component {
@@ -129,7 +128,8 @@ class Covid19Dashboard extends React.Component {
                   const isCompressRegion = (csvdata.data[i][3] === 'US' || csvdata.data[i][3] === 'China' ||
                                             csvdata.data[i][3] === 'Canada' || csvdata.data[i][3] === 'Australia' ||
                                             csvdata.data[i][3] === 'Germany' || csvdata.data[i][3] === 'Italy' ||
-                                            csvdata.data[i][3] === 'Spain')
+                                            csvdata.data[i][3] === 'Spain' || csvdata.data[i][3] === 'Brazil' ||
+                                            csvdata.data[i][3] === 'Mexico' || csvdata.data[i][3] === 'Chile')
   
                   let regionName = ''
   
@@ -183,6 +183,21 @@ class Covid19Dashboard extends React.Component {
                       lat = 40.5
                       long = -3.7
                     }
+
+                    if (regionName === 'Mexico') {
+                      lat = 23.6
+                      long = -102.5
+                    }
+
+                    if (regionName === 'Brazil') {
+                      lat = -14.2
+                      long = -51.9
+                    }
+
+                    if (regionName === 'Chile') {
+                      lat = -36.7
+                      long = -71.1
+                    }
   
                     if (!isNaN(lat)) {
                       dataList.push({
@@ -206,10 +221,29 @@ class Covid19Dashboard extends React.Component {
                   that.totalWorld.totalRecovered += parseInt(csvdata.data[i][9]);
                   that.totalWorld.totalDeaths += parseInt(csvdata.data[i][8]);
                 }
+
                 that.confirmedDailyWorld = addDailyData('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv', dataList, 'confirmedDaily')
                 that.recoveredDailyWorld = addDailyData('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv', dataList, 'recoveredDaily')
                 that.deathsDailyWorld = addDailyData('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv', dataList, 'deathsDaily')
 
+                for(var j=0; j < dataList.length; j++) {
+                  console.log(dataList[j]);
+                  if(dataList[j].attributes.region === 'US') {
+                    dataList[j].attributes.region = 'United States';
+                  }
+
+                  if(dataList[j].attributes.region === 'Czechia') {
+                    dataList[j].attributes.region = 'Czech Rep.';
+                  }
+
+                  if(dataList[j].attributes.region === 'Korea, South') {
+                    dataList[j].attributes.region = 'Korea';
+                  }
+
+                  if(dataList[j].attributes.region === 'Taiwan*') {
+                    dataList[j].attributes.region = 'Taiwan';
+                  }
+                }
                 const current = that.state.currentData;
                 current.totalConfirmed = formatNumber(that.totalWorld.totalConfirmed);
                 current.totalActive = formatNumber(that.totalWorld.totalActive);
@@ -243,7 +277,8 @@ class Covid19Dashboard extends React.Component {
             const isCompressRegion = (csvdata.data[i][1] === 'US' || csvdata.data[i][1] === 'China' ||
                                   csvdata.data[i][1] === 'Canada' || csvdata.data[i][1] === 'Australia' ||
                                   csvdata.data[i][3] === 'Germany' || csvdata.data[i][3] === 'Italy' ||
-                                  csvdata.data[i][3] === 'Spain')
+                                  csvdata.data[i][3] === 'Spain' || csvdata.data[i][3] === 'Brazil' ||
+                                  csvdata.data[i][3] === 'Mexico' || csvdata.data[i][3] === 'Chile')
     
             var regionName = ''
             if (isCompressRegion) {
@@ -278,7 +313,7 @@ class Covid19Dashboard extends React.Component {
 
                 if(i === 1) {
                   dailyWorldData.push({ 
-                    date: new Date(csvdata.data[0][j]) , 
+                    date: new Date(csvdata.data[0][j]) ,
                     value: parseInt(csvdata.data[i][j]),
                     valueLog: Math.log(parseInt(csvdata.data[i][j])),
                     increase: parseInt(csvdata.data[i][j]) - lastvalue
@@ -340,11 +375,11 @@ class Covid19Dashboard extends React.Component {
         });
 
         for(let i = 0; i < this.mapRegions.length; i++) {
-          if(e.target.attribute('region') === this.mapRegions[i].attribute("name")) {
+          console.log(this.mapRegions[i].attribute('name'));
+          if(e.target.attribute('region') === this.mapRegions[i].attribute('name')) {
             this.mapRegions[i].applySettings({
               color: '#FFAE42',
             });
-            //break;
           } else {
             this.mapRegions[i].applySettings({
               color: mapcolor,
@@ -529,15 +564,6 @@ class Covid19Dashboard extends React.Component {
                       <TotalItem column="Active" summaryType="sum" customizeText={this.summarizeGridText}/>
                     </Summary>
                   </DataGrid>
-                </TabPanelItem>
-                <TabPanelItem title="Germany Map">
-                  <VectorMap
-                    id="vector-map-germany"
-                    bounds={this.bounds}
-                    >
-                    <Layer dataSource={germanyMapsData}>
-                    </Layer>
-                  </VectorMap>
                 </TabPanelItem>
               </TabPanel>
             </div>
