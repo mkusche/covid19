@@ -129,7 +129,9 @@ class Covid19Dashboard extends React.Component {
                                             csvdata.data[i][3] === 'Canada' || csvdata.data[i][3] === 'Australia' ||
                                             csvdata.data[i][3] === 'Germany' || csvdata.data[i][3] === 'Italy' ||
                                             csvdata.data[i][3] === 'Spain' || csvdata.data[i][3] === 'Brazil' ||
-                                            csvdata.data[i][3] === 'Mexico' || csvdata.data[i][3] === 'Chile')
+                                            csvdata.data[i][3] === 'Mexico' || csvdata.data[i][3] === 'Chile' ||
+                                            csvdata.data[i][3] === 'Japan' || csvdata.data[i][3] === 'Colombia' ||
+                                            csvdata.data[i][3] === 'Peru')
   
                   let regionName = ''
   
@@ -197,6 +199,26 @@ class Covid19Dashboard extends React.Component {
                     if (regionName === 'Chile') {
                       lat = -36.7
                       long = -71.1
+                    }
+
+                    if (regionName === 'Chile') {
+                      lat = -36.7
+                      long = -71.1
+                    }
+
+                    if (regionName === 'Japan') {
+                      lat = 36.2
+                      long = 138.2
+                    }
+
+                    if (regionName === 'Colombia') {
+                      lat = 4.6
+                      long = -74.3
+                    }
+
+                    if (regionName === 'Peru') {
+                      lat = -9.2
+                      long = -75.0
                     }
   
                     if (!isNaN(lat)) {
@@ -278,7 +300,9 @@ class Covid19Dashboard extends React.Component {
                                   csvdata.data[i][1] === 'Canada' || csvdata.data[i][1] === 'Australia' ||
                                   csvdata.data[i][3] === 'Germany' || csvdata.data[i][3] === 'Italy' ||
                                   csvdata.data[i][3] === 'Spain' || csvdata.data[i][3] === 'Brazil' ||
-                                  csvdata.data[i][3] === 'Mexico' || csvdata.data[i][3] === 'Chile')
+                                  csvdata.data[i][3] === 'Mexico' || csvdata.data[i][3] === 'Chile' ||
+                                  csvdata.data[i][3] === 'Japan' || csvdata.data[i][3] === 'Colombia' ||
+                                  csvdata.data[i][3] === 'Peru')
     
             var regionName = ''
             if (isCompressRegion) {
