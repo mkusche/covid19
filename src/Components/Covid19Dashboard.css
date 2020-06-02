@@ -17,14 +17,20 @@
 
 #vector-map {
   margin: 5px;
+  height: calc(100% - 95px);
 }
 
 #totals-form {
-  margin: 5px;
+  margin: 0px 5px 5px 5px;
 }
 
+.map-tab-panel {
+  margin-bottom: 5px;
+  height: calc(100% - 50px);
+}
 .tab-panel {
   margin-bottom: 5px;
+  height: 33%;
 }
 
 .dx-card {

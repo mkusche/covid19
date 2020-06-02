@@ -22,6 +22,7 @@ import { Chart,
   Legend,
   Size,
   ArgumentAxis,
+  ValueAxis,
   Label as ChartLabel,
   Tooltip as ChartTooltip,
   TickInterval 
@@ -71,6 +72,10 @@ class Covid19Dashboard extends React.Component {
   
     this.storeVectorMap = (component) => {
       this.vectorMap = component.instance;
+
+      //dirty hack to set the right size
+      setTimeout(() => this.vectorMap.render(), 300);
+      this.vectorMap.render();
     };
 
     this.bounds = [-180, 85, 180, -60];
@@ -260,7 +265,7 @@ class Covid19Dashboard extends React.Component {
                 that.deathsDailyWorld = addDailyData('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv', dataList, 'deathsDaily')
 
                 for(var j=0; j < dataList.length; j++) {
-                  console.log(dataList[j]);
+
                   if(dataList[j].attributes.region === 'US') {
                     dataList[j].attributes.region = 'United States';
                   }
@@ -345,18 +350,16 @@ class Covid19Dashboard extends React.Component {
                 found.attributes[attributeName][j - 4].date = new Date(csvdata.data[0][j])
                 found.attributes[attributeName][j - 4].value += parseInt(csvdata.data[i][j])
                 found.attributes[attributeName][j - 4].increase += parseInt(csvdata.data[i][j]) - lastvalue
-                found.attributes[attributeName][j - 4].valueLog = found.attributes[attributeName][j - 4].value > 0 ? Math.log(found.attributes[attributeName][j - 4].value) : 0;
+              
 
                 if(i === 1) {
                   dailyWorldData.push({ 
                     date: new Date(csvdata.data[0][j]) ,
                     value: parseInt(csvdata.data[i][j]),
-                    valueLog: Math.log(parseInt(csvdata.data[i][j])),
                     increase: parseInt(csvdata.data[i][j]) - lastvalue
                  });
                 } else {
                   dailyWorldData[j - 4].value += parseInt(csvdata.data[i][j]);
-                  dailyWorldData[j - 4].valueLog = dailyWorldData[j - 4].value > 0 ? Math.log(dailyWorldData[j - 4].value) : 0;
                   dailyWorldData[j - 4].increase += parseInt(csvdata.data[i][j]) - lastvalue
                 }
 
@@ -411,7 +414,6 @@ class Covid19Dashboard extends React.Component {
         });
 
         for(let i = 0; i < this.mapRegions.length; i++) {
-          console.log(this.mapRegions[i].attribute('name'));
           if(e.target.attribute('region') === this.mapRegions[i].attribute('name')) {
             this.mapRegions[i].applySettings({
               color: '#FFAE42',
@@ -481,7 +483,7 @@ class Covid19Dashboard extends React.Component {
                 id="reset"
                 text="Reset"
                 onClick={this.resetClick}/>
-              <TabPanel className="tab-panel">
+              <TabPanel className="map-tab-panel">
                 <TabPanelItem title="World Map">
                   <VectorMap
                     id="vector-map"
@@ -584,7 +586,7 @@ class Covid19Dashboard extends React.Component {
                     showRowLines={false}
                     focusedRowEnabled={true}
                     rowAlternationEnabled={true}
-                    height="500"
+                    height={window.innerHeight - 140}
                     keyExpr="attributes.region">
                     <Selection mode="single" />
                     <Scrolling mode="virtual" />
@@ -613,7 +615,7 @@ class Covid19Dashboard extends React.Component {
               <TabPanel className="tab-panel">
                 <TabPanelItem title="Confirmed Daily">
                   <Chart dataSource={this.state.confirmedDaily}>
-                    <Size height={150} />
+                    <Size height={(window.innerHeight / 3)-70} />
                     <Series
                       valueField="increase"
                       argumentField="date"
@@ -630,7 +632,7 @@ class Covid19Dashboard extends React.Component {
                 </TabPanelItem>
                 <TabPanelItem title="Recovered Daily">
                   <Chart dataSource={this.state.recoveredDaily}>
-                    <Size height={150} />
+                    <Size height={(window.innerHeight / 3)-70} />
                     <Series
                       valueField="increase"
                       argumentField="date"
@@ -647,7 +649,7 @@ class Covid19Dashboard extends React.Component {
                 </TabPanelItem>
                 <TabPanelItem title="Deaths Daily">
                   <Chart dataSource={this.state.deathsDaily}>
-                    <Size height={150} />
+                    <Size height={(window.innerHeight / 3)-70} />
                     <Series
                       valueField="increase"
                       argumentField="date"
@@ -666,7 +668,7 @@ class Covid19Dashboard extends React.Component {
               <TabPanel className="tab-panel">
                 <TabPanelItem title="Confirmed Linear">
                   <Chart dataSource={this.state.confirmedDaily}>
-                    <Size height={150} />
+                    <Size height={(window.innerHeight / 3)-70} />
                     <Series
                       valueField="value"
                       argumentField="date"
@@ -683,7 +685,7 @@ class Covid19Dashboard extends React.Component {
                 </TabPanelItem>
                 <TabPanelItem title="Recovered Linear">
                   <Chart dataSource={this.state.recoveredDaily}>
-                    <Size height={150} />
+                    <Size height={(window.innerHeight / 3)-70} />
                     <Series
                       valueField="value"
                       argumentField="date"
@@ -700,7 +702,7 @@ class Covid19Dashboard extends React.Component {
                 </TabPanelItem>
                 <TabPanelItem title="Deaths Linear">
                   <Chart dataSource={this.state.deathsDaily}>
-                    <Size height={150} />
+                    <Size height={(window.innerHeight / 3)-70} />
                     <Series
                       valueField="value"
                       argumentField="date"
@@ -719,9 +721,9 @@ class Covid19Dashboard extends React.Component {
               <TabPanel className="tab-panel">
                 <TabPanelItem title="Confirmed Log.">
                   <Chart dataSource={this.state.confirmedDaily}>
-                    <Size height={150} />
+                    <Size height={(window.innerHeight / 3)-70} />
                     <Series
-                      valueField="valueLog"
+                      valueField="value"
                       argumentField="date"
                       barPadding={0}
                       type="spline"
@@ -731,14 +733,15 @@ class Covid19Dashboard extends React.Component {
                         <TickInterval days={20} /> 
                         <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
                       </ArgumentAxis>
+                      <ValueAxis type="logarithmic" />
                       <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
                   </Chart>
                 </TabPanelItem>
                 <TabPanelItem title="Recovered Log.">
                   <Chart dataSource={this.state.recoveredDaily}>
-                    <Size height={150} />
+                    <Size height={(window.innerHeight / 3)-70} />
                     <Series
-                      valueField="valueLog"
+                      valueField="value"
                       argumentField="date"
                       barPadding={0}
                       type="spline"
@@ -748,14 +751,15 @@ class Covid19Dashboard extends React.Component {
                         <TickInterval days={20} /> 
                         <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
                       </ArgumentAxis>
+                      <ValueAxis type="logarithmic" />
                       <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
                   </Chart>
                 </TabPanelItem>
                 <TabPanelItem title="Deaths Log.">
                   <Chart dataSource={this.state.deathsDaily}>
-                    <Size height={150} />
+                    <Size height={(window.innerHeight / 3)-70} />
                     <Series
-                      valueField="valueLog"
+                      valueField="value"
                       argumentField="date"
                       barPadding={0}
                       type="spline"
@@ -765,6 +769,7 @@ class Covid19Dashboard extends React.Component {
                         <TickInterval days={20} /> 
                         <ChartLabel overlappingBehavior={'hide'}></ChartLabel>
                       </ArgumentAxis>
+                      <ValueAxis type="logarithmic" />
                       <ChartTooltip enabled={true} customizeTooltip={this.chartTooltipText} />
                   </Chart>
                 </TabPanelItem>
