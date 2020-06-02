@@ -131,7 +131,8 @@ class Covid19Dashboard extends React.Component {
                                             csvdata.data[i][3] === 'Spain' || csvdata.data[i][3] === 'Brazil' ||
                                             csvdata.data[i][3] === 'Mexico' || csvdata.data[i][3] === 'Chile' ||
                                             csvdata.data[i][3] === 'Japan' || csvdata.data[i][3] === 'Colombia' ||
-                                            csvdata.data[i][3] === 'Peru')
+                                            csvdata.data[i][3] === 'Peru' || csvdata.data[i][3] === 'Russia' || 
+                                            csvdata.data[i][3] === 'Ukraine')
   
                   let regionName = ''
   
@@ -220,6 +221,16 @@ class Covid19Dashboard extends React.Component {
                       lat = -9.2
                       long = -75.0
                     }
+
+                    if (regionName === 'Russia') {
+                      lat = 61.5
+                      long = 105.3
+                    }
+
+                    if (regionName === 'Ukraine') {
+                      lat = 48.4
+                      long = 31.2
+                    }
   
                     if (!isNaN(lat)) {
                       dataList.push({
@@ -302,7 +313,8 @@ class Covid19Dashboard extends React.Component {
                                   csvdata.data[i][3] === 'Spain' || csvdata.data[i][3] === 'Brazil' ||
                                   csvdata.data[i][3] === 'Mexico' || csvdata.data[i][3] === 'Chile' ||
                                   csvdata.data[i][3] === 'Japan' || csvdata.data[i][3] === 'Colombia' ||
-                                  csvdata.data[i][3] === 'Peru')
+                                  csvdata.data[i][3] === 'Peru'|| csvdata.data[i][3] === 'Russia' || 
+                                  csvdata.data[i][3] === 'Ukraine')
     
             var regionName = ''
             if (isCompressRegion) {
