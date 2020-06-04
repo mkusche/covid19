@@ -77,6 +77,10 @@ class Covid19Dashboard extends React.Component {
       this.vectorMap.render();
     };
 
+    this.storeDataGrid = (component) => {
+      this.dataGrid = component.instance;
+    }
+
     this.bounds = [-180, 85, 180, -60];
 
     this.sizeGroups = function () {
@@ -387,7 +391,48 @@ class Covid19Dashboard extends React.Component {
             });
           }
         }
+
+        this.dataGrid.selectRows(current.regionName , false);
+        this.dataGrid.option('focusedRowKey',  current.regionName);
       }
+    }
+
+    this.rowSelected = ({ selectedRowsData }) => {
+      const scrollPostion = this.dataGrid.getScrollable().scrollTop();
+
+      const confirmedDaily = selectedRowsData[0].attributes.confirmedDaily;
+      const recoveredDaily = selectedRowsData[0].attributes.recoveredDaily;
+      const deathsDaily = selectedRowsData[0].attributes.deathsDaily;
+      
+      const current = this.state.currentData;
+      current.regionName = selectedRowsData[0].attributes.region;
+      current.totalConfirmed = formatNumber(parseInt(selectedRowsData[0].attributes.confirmed));
+      current.totalActive = formatNumber(parseInt(selectedRowsData[0].attributes.active));
+      current.totalRecovered = formatNumber(parseInt(selectedRowsData[0].attributes.recovered));
+      current.totalDeaths= formatNumber(parseInt(selectedRowsData[0].attributes.deaths));
+
+      this.setState({
+        confirmedDaily: confirmedDaily,
+        recoveredDaily: recoveredDaily,
+        deathsDaily: deathsDaily,
+        currentData: current
+      });
+
+      this.vectorMap.zoomFactor(6);
+      this.vectorMap.center(selectedRowsData[0].coordinates);
+      for(let i = 0; i < this.mapRegions.length; i++) {
+        if(selectedRowsData[0].attributes.regionISO3 === this.mapRegions[i].attribute('iso_a3')) {
+          this.mapRegions[i].applySettings({
+            color: '#FFAE42',
+          });
+        } else {
+          this.mapRegions[i].applySettings({
+            color: mapcolor,
+          });
+        }
+      }
+
+      this.dataGrid.getScrollable().scrollTo(scrollPostion);
     }
 
     this.resetClick = () => {
@@ -421,6 +466,10 @@ class Covid19Dashboard extends React.Component {
 
     this.getRegions = (elements) => {
       this.mapRegions = elements;
+    }
+
+    this.formatCellNumber = (cell) => {
+      return formatNumber(cell.value);
     }
 
     this.dataSource = this.getData();
@@ -544,21 +593,24 @@ class Covid19Dashboard extends React.Component {
                 <TabPanelItem title="Table">
                   <DataGrid
                     id="gridContainer"
+                    ref={this.storeDataGrid}
                     dataSource={this.dataSource}
                     showBorders={false}
                     showColumnLines={false}
                     showRowLines={false}
                     focusedRowEnabled={true}
+                    autoNavigateToFocusedRow={true}
                     rowAlternationEnabled={true}
                     height={window.innerHeight - 140}
-                    keyExpr="attributes.region">
+                    keyExpr="attributes.region"
+                    onSelectionChanged={this.rowSelected} >
                     <Selection mode="single" />
                     <Scrolling mode="virtual" />
-                    <Column dataField="attributes.region"  caption="Country" />
-                    <Column dataField="attributes.confirmed" width={100} caption="Confirmed" dataType="number" defaultSortOrder="desc"/>
-                    <Column dataField="attributes.recovered" width={100} caption="Recovered" dataType="number"/>
-                    <Column dataField="attributes.deaths" width={100} caption="Deaths" dataType="number"/>
-                    <Column dataField="attributes.active" width={100} caption="Active" dataType="number"/>
+                    <Column dataField="attributes.region" caption="Country" />
+                    <Column dataField="attributes.confirmed" width={100} caption="Confirmed" dataType="number" defaultSortOrder="desc" customizeText={this.formatCellNumber}/>
+                    <Column dataField="attributes.recovered" width={100} caption="Recovered" dataType="number" customizeText={this.formatCellNumber}/>
+                    <Column dataField="attributes.deaths" width={100} caption="Deaths" dataType="number" customizeText={this.formatCellNumber}/>
+                    <Column dataField="attributes.active" width={100} caption="Active" dataType="number" customizeText={this.formatCellNumber}/>
                     <Summary>
                       <TotalItem column="Confirmed" summaryType="sum" customizeText={this.summarizeGridText}/>
                       <TotalItem column="Recovered" summaryType="sum" customizeText={this.summarizeGridText}/>
