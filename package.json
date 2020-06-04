@@ -10,7 +10,6 @@
     "devextreme-react": "19.2-stable",
     "devextreme-themebuilder": "19.2-stable",
     "jquery": "^3.5.0",
-    "papaparse": "^5.2.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1"
