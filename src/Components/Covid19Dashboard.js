@@ -34,7 +34,6 @@ import { TextBox } from 'devextreme-react';
 import { formatNumber } from 'devextreme/localization';
 
 import JQuery from 'jquery';
-import Papa from 'papaparse';
 import * as mapsData from 'devextreme/dist/js/vectormap-data/world.js';
 
 const worldRegionName = "World";
@@ -108,269 +107,233 @@ class Covid19Dashboard extends React.Component {
 
     this.getData = () => {
 
-        var that = this;
-        const dataList = []
-        JQuery.ajax({
-          url: 'https://api.github.com/repos/CSSEGISandData/COVID-19/contents/csse_covid_19_data/csse_covid_19_daily_reports',
-          async: false,
-          crossDomain: true,
-          accept: {
-            'Access-Control-Allow-Origin': '*'
-          },
-          success: function (result) {
-            const newestFile = result[result.length - 2]
-            
-            JQuery.ajax({
-              url: newestFile.download_url,
-              async: false,
-              crossDomain: true,
-              accept: {
-                'Access-Control-Allow-Origin': '*'
-              },
-              success: function (result) {
-                const csvdata = Papa.parse(result)
-                for (var i = 1; i < csvdata.data.length - 1; i++) {
-                  const isCompressRegion = (csvdata.data[i][3] === 'US' || csvdata.data[i][3] === 'China' ||
-                                            csvdata.data[i][3] === 'Canada' || csvdata.data[i][3] === 'Australia' ||
-                                            csvdata.data[i][3] === 'Germany' || csvdata.data[i][3] === 'Italy' ||
-                                            csvdata.data[i][3] === 'Spain' || csvdata.data[i][3] === 'Brazil' ||
-                                            csvdata.data[i][3] === 'Mexico' || csvdata.data[i][3] === 'Chile' ||
-                                            csvdata.data[i][3] === 'Japan' || csvdata.data[i][3] === 'Colombia' ||
-                                            csvdata.data[i][3] === 'Peru' || csvdata.data[i][3] === 'Russia' || 
-                                            csvdata.data[i][3] === 'Ukraine')
-  
-                  let regionName = ''
-  
-                  if (isCompressRegion) {
-                    regionName = csvdata.data[i][3]
-                  } else {
-                    regionName += csvdata.data[i][2] ? csvdata.data[i][2] + ', ' : ''
-                    regionName += csvdata.data[i][3]
-                  }
-  
-                  const found = dataList.find((element) => element.attributes.region === regionName && isCompressRegion)
-                  if (found) {
-                    found.attributes.confirmed += parseInt(csvdata.data[i][7])
-                    found.attributes.recovered += parseInt(csvdata.data[i][9])
-                    found.attributes.deaths += parseInt(csvdata.data[i][8])
-                    found.attributes.active += parseInt(csvdata.data[i][10])
-                  } else {
-                    let lat = parseFloat(csvdata.data[i][5])
-                    let long = parseFloat(csvdata.data[i][6])
-  
-                    if (regionName === 'US') {
-                      lat = 39.50
-                      long = -98.35
-                    }
-  
-                    if (regionName === 'Canada') {
-                      lat = 62.24
-                      long = -96.4835
-                    }
-  
-                    if (regionName === 'China') {
-                      lat = 35.33
-                      long = 103.23
-                    }
-                    if (regionName === 'Australia') {
-                      lat = -23.7
-                      long = 132.8
-                    }
-
-                    if (regionName === 'Germany') {
-                      lat = 51.2
-                      long = 10.5
-                    }
-
-                    if (regionName === 'Italy') {
-                      lat = 41.9
-                      long = 12.6
-                    }
-
-                    if (regionName === 'Spain') {
-                      lat = 40.5
-                      long = -3.7
-                    }
-
-                    if (regionName === 'Mexico') {
-                      lat = 23.6
-                      long = -102.5
-                    }
-
-                    if (regionName === 'Brazil') {
-                      lat = -14.2
-                      long = -51.9
-                    }
-
-                    if (regionName === 'Chile') {
-                      lat = -36.7
-                      long = -71.1
-                    }
-
-                    if (regionName === 'Chile') {
-                      lat = -36.7
-                      long = -71.1
-                    }
-
-                    if (regionName === 'Japan') {
-                      lat = 36.2
-                      long = 138.2
-                    }
-
-                    if (regionName === 'Colombia') {
-                      lat = 4.6
-                      long = -74.3
-                    }
-
-                    if (regionName === 'Peru') {
-                      lat = -9.2
-                      long = -75.0
-                    }
-
-                    if (regionName === 'Russia') {
-                      lat = 61.5
-                      long = 105.3
-                    }
-
-                    if (regionName === 'Ukraine') {
-                      lat = 48.4
-                      long = 31.2
-                    }
-  
-                    if (!isNaN(lat)) {
-                      dataList.push({
-                        coordinates: [long, lat],
-                        attributes: {
-                          region: regionName,
-                          confirmed: parseInt(csvdata.data[i][7]),
-                          recovered: parseInt(csvdata.data[i][9]),
-                          deaths: parseInt(csvdata.data[i][8]),
-                          active: parseInt(csvdata.data[i][10]),
-                          confirmedDaily: [],
-                          recoveredDaily: [],
-                          deathsDaily: []
-                        }
-                      })
-                    }
-                  }
-
-                  that.totalWorld.totalConfirmed +=  parseInt(csvdata.data[i][7]);
-                  that.totalWorld.totalActive += parseInt(csvdata.data[i][10]);
-                  that.totalWorld.totalRecovered += parseInt(csvdata.data[i][9]);
-                  that.totalWorld.totalDeaths += parseInt(csvdata.data[i][8]);
-                }
-
-                that.confirmedDailyWorld = addDailyData('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv', dataList, 'confirmedDaily')
-                that.recoveredDailyWorld = addDailyData('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv', dataList, 'recoveredDaily')
-                that.deathsDailyWorld = addDailyData('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv', dataList, 'deathsDaily')
-
-                for(var j=0; j < dataList.length; j++) {
-
-                  if(dataList[j].attributes.region === 'US') {
-                    dataList[j].attributes.region = 'United States';
-                  }
-
-                  if(dataList[j].attributes.region === 'Czechia') {
-                    dataList[j].attributes.region = 'Czech Rep.';
-                  }
-
-                  if(dataList[j].attributes.region === 'Korea, South') {
-                    dataList[j].attributes.region = 'Korea';
-                  }
-
-                  if(dataList[j].attributes.region === 'Taiwan*') {
-                    dataList[j].attributes.region = 'Taiwan';
-                  }
-                }
-                const current = that.state.currentData;
-                current.totalConfirmed = formatNumber(that.totalWorld.totalConfirmed);
-                current.totalActive = formatNumber(that.totalWorld.totalActive);
-                current.totalRecovered = formatNumber(that.totalWorld.totalRecovered);
-                current.totalDeaths = formatNumber(that.totalWorld.totalDeaths);
-
-                that.state.confirmedDaily = that.confirmedDailyWorld;
-                that.state.recoveredDaily = that.recoveredDailyWorld;
-                that.state.deathsDaily = that.deathsDailyWorld;
-                that.state.currentData = current;
-              }
-            })
-          }
-        })
-        return dataList;
-      };
-  
-    function addDailyData (ajaxUrl, dataList, attributeName) {
-      const dailyWorldData = [];
-
+      var that = this;
+      const dataList = [];
       JQuery.ajax({
-        url: ajaxUrl,
+        url: 'https://corona.lmao.ninja/v2/countries',
         async: false,
-        crossDomain: true,
-        accept: {
-          'Access-Control-Allow-Origin': '*'
-        },
-        success: function (result) {
-          const csvdata = Papa.parse(result)
-          for (var i = 1; i < csvdata.data.length - 1; i++) {
-            const isCompressRegion = (csvdata.data[i][1] === 'US' || csvdata.data[i][1] === 'China' ||
-                                  csvdata.data[i][1] === 'Canada' || csvdata.data[i][1] === 'Australia' ||
-                                  csvdata.data[i][3] === 'Germany' || csvdata.data[i][3] === 'Italy' ||
-                                  csvdata.data[i][3] === 'Spain' || csvdata.data[i][3] === 'Brazil' ||
-                                  csvdata.data[i][3] === 'Mexico' || csvdata.data[i][3] === 'Chile' ||
-                                  csvdata.data[i][3] === 'Japan' || csvdata.data[i][3] === 'Colombia' ||
-                                  csvdata.data[i][3] === 'Peru'|| csvdata.data[i][3] === 'Russia' || 
-                                  csvdata.data[i][3] === 'Ukraine')
-    
-            var regionName = ''
-            if (isCompressRegion) {
-              regionName = csvdata.data[i][1]
-            } else {
-              regionName = csvdata.data[i][0] ? csvdata.data[i][0] + ', ' : ''
-              regionName += csvdata.data[i][1]
-            }
-            // eslint-disable-next-line no-loop-func
-            const found = dataList.find((element) => {
-              return element.attributes.region === regionName;
-            })
-            if (found) {
-              let lastvalue = 0
-              for (var j = 4; j < csvdata.data[i].length; j++) {
-                if (!found.attributes[attributeName][j - 4]) {
-                  found.attributes[attributeName][j - 4] = {}
-                }
-    
-                if (!found.attributes[attributeName][j - 4].value) {
-                  found.attributes[attributeName][j - 4].value = 0
-                }
-    
-                if (!found.attributes[attributeName][j - 4].increase) {
-                  found.attributes[attributeName][j - 4].increase = 0
-                }
-    
-                found.attributes[attributeName][j - 4].date = new Date(csvdata.data[0][j])
-                found.attributes[attributeName][j - 4].value += parseInt(csvdata.data[i][j])
-                found.attributes[attributeName][j - 4].increase += parseInt(csvdata.data[i][j]) - lastvalue
-              
-
-                if(i === 1) {
-                  dailyWorldData.push({ 
-                    date: new Date(csvdata.data[0][j]) ,
-                    value: parseInt(csvdata.data[i][j]),
-                    increase: parseInt(csvdata.data[i][j]) - lastvalue
-                 });
-                } else {
-                  dailyWorldData[j - 4].value += parseInt(csvdata.data[i][j]);
-                  dailyWorldData[j - 4].increase += parseInt(csvdata.data[i][j]) - lastvalue
-                }
-
-                lastvalue = parseInt(csvdata.data[i][j]);
+        success: (countryList) => {
+          countryList.forEach((country) => {
+            dataList.push({
+              coordinates: [country.countryInfo.long, country.countryInfo.lat],
+              attributes: {
+                region: country.country,
+                regionISO2: country.countryInfo.iso2,
+                regionISO3: country.countryInfo.iso3,
+                confirmed: country.cases,
+                confirmedToday: country.casesToday,
+                recovered: country.recovered,
+                recoveredToday: country.recoveredToday,
+                deaths: country.deaths,
+                deathsToday: country.deathsToday,
+                active: country.active,
+                confirmedDaily: [],
+                recoveredDaily: [],
+                deathsDaily: []
               }
+            });
+            that.totalWorld.totalConfirmed += country.cases;
+            that.totalWorld.totalActive += country.active;
+            that.totalWorld.totalRecovered += country.recovered;
+            that.totalWorld.totalDeaths += country.deaths;
+
+            
+          });
+
+          JQuery.ajax({
+            url: 'https://corona.lmao.ninja/v2/historical/?lastdays=all',
+            async: false,
+            success: (dailyData) => {
+              const dailyWorldConfirmed = [];
+              const dailyWorldRecovered = [];
+              const dailyWorldDeaths = [];
+
+              dailyData.forEach((countryDaily) => {
+                
+                //dirty clearing data
+                if(countryDaily.country === "Cote d'Ivoire") {
+                  countryDaily.country = "Côte d'Ivoire";
+                }
+
+                if(countryDaily.country === "Holy See") {
+                  countryDaily.country = "Holy See (Vatican City State)";
+                }
+                
+                if(countryDaily.country === "Burma") {
+                  countryDaily.country = "Myanmar";
+                }
+                if(countryDaily.country === "Lao People\"s Democratic Republic") {
+                  countryDaily.country = "Lao People's Democratic Republic";
+                }
+                
+                if(countryDaily.province === "saint pierre and miquelon") {
+                  countryDaily.province = "Saint Pierre Miquelon";
+                }
+
+                if(countryDaily.province === "curacao") {
+                  countryDaily.province = "Curaçao";
+                }
+
+                if(countryDaily.province === "saint barthelemy") {
+                  countryDaily.province = "St. Barth";
+                }
+
+                if(countryDaily.province === "st martin") {
+                  countryDaily.province = "Saint Martin";
+                }
+
+                if(countryDaily.province === "reunion") {
+                  countryDaily.province = "Réunion";
+                }
+
+                if(countryDaily.province === "macau") {
+                  countryDaily.province = "Macao";
+                }
+
+                var country = dataList.find((element) => {
+                  return (countryDaily.province != null && element.attributes.region.toLowerCase() === countryDaily.province.toLowerCase());
+                });
+
+                if(!country) {
+                  country = dataList.find((element) => {
+                    return (element.attributes.region.toLowerCase() === countryDaily.country.toLowerCase())
+                  });
+                }
+                
+                var lastdayConfirmed = 0;
+                const caseDates = Object.keys(countryDaily.timeline.cases)
+                caseDates.forEach((date) => {
+                  try {
+
+                    const dateDate = new Date(date);
+                    const daily = country.attributes.confirmedDaily.find((element) => {return element.dateStr === date});                   
+                    if(daily) {
+                      daily.value += countryDaily.timeline.cases[date];
+                      daily.increase += countryDaily.timeline.cases[date] - lastdayConfirmed;
+                    } else {
+                      country.attributes.confirmedDaily.push({
+                        date: dateDate,
+                        dateStr: date,
+                        value: countryDaily.timeline.cases[date],
+                        increase: countryDaily.timeline.cases[date] - lastdayConfirmed
+                      });
+                    }
+
+                    const dailyWorld = dailyWorldConfirmed.find((element) => {return element.dateStr === date});
+                    if (dailyWorld) {
+                      dailyWorld.value += countryDaily.timeline.cases[date];
+                      dailyWorld.increase += countryDaily.timeline.cases[date] - lastdayConfirmed;
+                    } else {
+                      dailyWorldConfirmed.push({ 
+                        date: dateDate,
+                        dateStr: date,
+                        value: countryDaily.timeline.cases[date],
+                        increase: countryDaily.timeline.cases[date] - lastdayConfirmed
+                     });
+                    }
+
+                  } catch { }
+
+                  lastdayConfirmed = countryDaily.timeline.cases[date]
+                });
+
+                var lastdayRecovered = 0;
+                const recoveredDates = Object.keys(countryDaily.timeline.recovered)
+                recoveredDates.forEach((date) => {
+                  try {
+
+                    const dateDate = new Date(date);
+                    const daily = country.attributes.recoveredDaily.find((element) => {return element.dateStr === date});
+                    if(daily) {
+                      daily.value += countryDaily.timeline.recovered[date];
+                      daily.increase += countryDaily.timeline.recovered[date] - lastdayRecovered;
+                    } else {
+                      country.attributes.recoveredDaily.push({
+                        date: dateDate,
+                        dateStr: date,
+                        value: countryDaily.timeline.recovered[date],
+                        increase:  countryDaily.timeline.recovered[date] - lastdayRecovered
+                      });
+                    }
+
+                    const dailyWorld = dailyWorldRecovered.find((element) => {return element.dateStr === date});
+                    if (dailyWorld) {
+                      dailyWorld.value += countryDaily.timeline.recovered[date];
+                      dailyWorld.increase += countryDaily.timeline.recovered[date] - lastdayRecovered;
+                    } else {
+                      dailyWorldRecovered.push({ 
+                        date: dateDate,
+                        dateStr: date,
+                        value: countryDaily.timeline.recovered[date],
+                        increase: countryDaily.timeline.recovered[date] - lastdayRecovered
+                     });
+                    }
+
+                  } catch { }
+
+                  lastdayRecovered = countryDaily.timeline.recovered[date]
+                });
+
+                var lastdayDeaths = 0;
+                const deathsDates = Object.keys(countryDaily.timeline.deaths)
+                deathsDates.forEach((date) => {
+                  try {
+
+                    const dateDate = new Date(date);
+                    const daily = country.attributes.deathsDaily.find((element) => {return element.dateStr === date});
+                    if(daily) {
+                      daily.value += countryDaily.timeline.deaths[date];
+                      daily.increase += countryDaily.timeline.deaths[date] - lastdayDeaths;
+                    } else {
+                      country.attributes.deathsDaily.push({
+                        date: dateDate,
+                        dateStr: date,
+                        value: countryDaily.timeline.deaths[date],
+                        increase: countryDaily.timeline.deaths[date] - lastdayDeaths
+                      });
+                    }
+
+                    const dailyWorld = dailyWorldDeaths.find((element) => {return element.dateStr === date});
+                    if (dailyWorld) {
+                      dailyWorld.value += countryDaily.timeline.deaths[date];
+                      dailyWorld.increase += countryDaily.timeline.deaths[date] - lastdayDeaths;
+                    } else {
+                      dailyWorldDeaths.push({ 
+                        date: dateDate,
+                        dateStr: date,
+                        value: countryDaily.timeline.deaths[date],
+                        increase: countryDaily.timeline.deaths[date] - lastdayDeaths
+                     });
+                    }
+
+                } catch { }
+
+                  lastdayDeaths = countryDaily.timeline.deaths[date]
+                });
+                
+              });
+              that.confirmedDailyWorld = dailyWorldConfirmed;
+              that.recoveredDailyWorld = dailyWorldRecovered;
+              that.deathsDailyWorld = dailyWorldDeaths;
             }
-          }
+          });
+
+          const current = that.state.currentData;
+          current.totalConfirmed = formatNumber(that.totalWorld.totalConfirmed);
+          current.totalActive = formatNumber(that.totalWorld.totalActive);
+          current.totalRecovered = formatNumber(that.totalWorld.totalRecovered);
+          current.totalDeaths = formatNumber(that.totalWorld.totalDeaths);
+
+          that.state.confirmedDaily = that.confirmedDailyWorld;
+          that.state.recoveredDaily = that.recoveredDailyWorld;
+          that.state.deathsDaily = that.deathsDailyWorld;
+          that.state.currentData = current;
+          
         }
       });
-      return dailyWorldData;
-    }
+
+      return dataList;
+    };
 
     this.tooltipText = (info) => {
       if (info.layer.type === 'marker') {
@@ -414,7 +377,7 @@ class Covid19Dashboard extends React.Component {
         });
 
         for(let i = 0; i < this.mapRegions.length; i++) {
-          if(e.target.attribute('region') === this.mapRegions[i].attribute('name')) {
+          if(e.target.attribute('regionISO3') === this.mapRegions[i].attribute('iso_a3')) {
             this.mapRegions[i].applySettings({
               color: '#FFAE42',
             });
@@ -459,6 +422,7 @@ class Covid19Dashboard extends React.Component {
     this.getRegions = (elements) => {
       this.mapRegions = elements;
     }
+
     this.dataSource = this.getData();
   }
   
@@ -781,7 +745,7 @@ class Covid19Dashboard extends React.Component {
             <Location row={1} col={0} screen="lg" />
             <Location row={2} col={0} screen="sm" />
 
-            <div>Datasource: <a href="https://github.com/CSSEGISandData/COVID-19">Johns Hopkins CSSE</a></div>
+            <div>Datasource: <a href="https://corona.lmao.ninja/docs/#/">Novel COVID API</a></div>
           </ResponsiveBoxItem>
 
         </ResponsiveBox>
