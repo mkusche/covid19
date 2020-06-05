@@ -496,7 +496,7 @@ class Covid19Dashboard extends React.Component {
                 id="reset"
                 text="Reset"
                 onClick={this.resetClick}/>
-              <TabPanel className="map-tab-panel">
+              <TabPanel className="map-tab-panel" deferRendering={false} >
                 <TabPanelItem title="World Map">
                   <VectorMap
                     id="vector-map"
