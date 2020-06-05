@@ -360,18 +360,26 @@ class Covid19Dashboard extends React.Component {
 
     this.markerClick = (e) => {
       if (e.target && e.target.layer.type === 'marker') {
-        e.component.center(e.target.coordinates()).zoomFactor(6);
+        const region = e.target.attribute('region');
+        this.dataGrid.selectRows(region, false);
+        this.dataGrid.option('focusedRowKey', region);
+      }
+    }
 
-        const confirmedDaily = e.target.attribute('confirmedDaily');
-        const recoveredDaily = e.target.attribute('recoveredDaily');
-        const deathsDaily = e.target.attribute('deathsDaily');
+    this.rowSelected = ({ selectedRowsData }) => {
+      if(selectedRowsData.length > 0) {
+        const scrollPostion = this.dataGrid.getScrollable().scrollTop();
+
+        const confirmedDaily = selectedRowsData[0].attributes.confirmedDaily;
+        const recoveredDaily = selectedRowsData[0].attributes.recoveredDaily;
+        const deathsDaily = selectedRowsData[0].attributes.deathsDaily;
         
         const current = this.state.currentData;
-        current.regionName = e.target.attribute('region');
-        current.totalConfirmed = formatNumber(parseInt(e.target.attribute('confirmed')));
-        current.totalActive = formatNumber(parseInt(e.target.attribute('active')));
-        current.totalRecovered = formatNumber(parseInt(e.target.attribute('recovered')));
-        current.totalDeaths= formatNumber(parseInt(e.target.attribute('deaths')));
+        current.regionName = selectedRowsData[0].attributes.region;
+        current.totalConfirmed = formatNumber(parseInt(selectedRowsData[0].attributes.confirmed));
+        current.totalActive = formatNumber(parseInt(selectedRowsData[0].attributes.active));
+        current.totalRecovered = formatNumber(parseInt(selectedRowsData[0].attributes.recovered));
+        current.totalDeaths= formatNumber(parseInt(selectedRowsData[0].attributes.deaths));
 
         this.setState({
           confirmedDaily: confirmedDaily,
@@ -380,8 +388,10 @@ class Covid19Dashboard extends React.Component {
           currentData: current
         });
 
+        this.vectorMap.zoomFactor(6);
+        this.vectorMap.center(selectedRowsData[0].coordinates);
         for(let i = 0; i < this.mapRegions.length; i++) {
-          if(e.target.attribute('regionISO3') === this.mapRegions[i].attribute('iso_a3')) {
+          if(selectedRowsData[0].attributes.regionISO3 === this.mapRegions[i].attribute('iso_a3')) {
             this.mapRegions[i].applySettings({
               color: '#FFAE42',
             });
@@ -392,47 +402,8 @@ class Covid19Dashboard extends React.Component {
           }
         }
 
-        this.dataGrid.selectRows(current.regionName , false);
-        this.dataGrid.option('focusedRowKey',  current.regionName);
+        this.dataGrid.getScrollable().scrollTo(scrollPostion);
       }
-    }
-
-    this.rowSelected = ({ selectedRowsData }) => {
-      const scrollPostion = this.dataGrid.getScrollable().scrollTop();
-
-      const confirmedDaily = selectedRowsData[0].attributes.confirmedDaily;
-      const recoveredDaily = selectedRowsData[0].attributes.recoveredDaily;
-      const deathsDaily = selectedRowsData[0].attributes.deathsDaily;
-      
-      const current = this.state.currentData;
-      current.regionName = selectedRowsData[0].attributes.region;
-      current.totalConfirmed = formatNumber(parseInt(selectedRowsData[0].attributes.confirmed));
-      current.totalActive = formatNumber(parseInt(selectedRowsData[0].attributes.active));
-      current.totalRecovered = formatNumber(parseInt(selectedRowsData[0].attributes.recovered));
-      current.totalDeaths= formatNumber(parseInt(selectedRowsData[0].attributes.deaths));
-
-      this.setState({
-        confirmedDaily: confirmedDaily,
-        recoveredDaily: recoveredDaily,
-        deathsDaily: deathsDaily,
-        currentData: current
-      });
-
-      this.vectorMap.zoomFactor(6);
-      this.vectorMap.center(selectedRowsData[0].coordinates);
-      for(let i = 0; i < this.mapRegions.length; i++) {
-        if(selectedRowsData[0].attributes.regionISO3 === this.mapRegions[i].attribute('iso_a3')) {
-          this.mapRegions[i].applySettings({
-            color: '#FFAE42',
-          });
-        } else {
-          this.mapRegions[i].applySettings({
-            color: mapcolor,
-          });
-        }
-      }
-
-      this.dataGrid.getScrollable().scrollTo(scrollPostion);
     }
 
     this.resetClick = () => {
@@ -458,6 +429,9 @@ class Covid19Dashboard extends React.Component {
           color: mapcolor,
         });
       }
+
+      this.dataGrid.selectRows(null, false);
+      this.dataGrid.option('focusedRowIndex', -1);
     };
 
     this.summarizeGridText = (data) => {
