@@ -125,12 +125,18 @@ class Covid19Dashboard extends React.Component {
                 regionISO2: country.countryInfo.iso2,
                 regionISO3: country.countryInfo.iso3,
                 confirmed: country.cases,
-                confirmedToday: country.casesToday,
+                confirmedToday: country.todayCases,
+                confirmedPerMillion: country.casesPerOneMillion,
                 recovered: country.recovered,
-                recoveredToday: country.recoveredToday,
+                recoveredToday: country.todayRecovered,
+                recoveredPerMillion: country.casesPerOneMillion,
                 deaths: country.deaths,
-                deathsToday: country.deathsToday,
+                deathsToday: country.todayDeaths,
+                deathsPerMillion: country.casesPerOneMillion,
                 active: country.active,
+                critical: country.critical,
+                tests: country.tests,
+                testsPerMillion: country.testsPerOneMillion,
                 confirmedDaily: [],
                 recoveredDaily: [],
                 deathsDaily: []
@@ -335,7 +341,7 @@ class Covid19Dashboard extends React.Component {
           
         }
       });
-
+      console.log(dataList)
       return dataList;
     };
 
@@ -581,15 +587,23 @@ class Covid19Dashboard extends React.Component {
                     <Selection mode="single" />
                     <Scrolling mode="virtual" />
                     <Column dataField="attributes.region" caption="Country" />
-                    <Column dataField="attributes.confirmed" width={100} caption="Confirmed" dataType="number" defaultSortOrder="desc" customizeText={this.formatCellNumber}/>
+                    <Column dataField="attributes.confirmed" width={100} caption="Cases" dataType="number" defaultSortOrder="desc" customizeText={this.formatCellNumber}/>
+                    <Column dataField="attributes.confirmedToday" width={100} caption="Cases Today" dataType="number" customizeText={this.formatCellNumber}/>
+                    <Column dataField="attributes.confirmedPerMillion" width={100} caption="Cases / Mio" dataType="number" customizeText={this.formatCellNumber}/>
                     <Column dataField="attributes.recovered" width={100} caption="Recovered" dataType="number" customizeText={this.formatCellNumber}/>
                     <Column dataField="attributes.deaths" width={100} caption="Deaths" dataType="number" customizeText={this.formatCellNumber}/>
+                    <Column dataField="attributes.deathsToday" width={100} caption="Deaths Today" dataType="number" customizeText={this.formatCellNumber}/>
                     <Column dataField="attributes.active" width={100} caption="Active" dataType="number" customizeText={this.formatCellNumber}/>
+                    <Column dataField="attributes.critical" width={100} caption="Critical" dataType="number" customizeText={this.formatCellNumber}/>
                     <Summary>
-                      <TotalItem column="Confirmed" summaryType="sum" customizeText={this.summarizeGridText}/>
+                      <TotalItem column="Cases" summaryType="sum" customizeText={this.summarizeGridText}/>
+                      <TotalItem column="Cases Today" summaryType="sum" customizeText={this.summarizeGridText}/>
+                      <TotalItem column="Cases / Mio" summaryType="avg" customizeText={this.summarizeGridText}/>
                       <TotalItem column="Recovered" summaryType="sum" customizeText={this.summarizeGridText}/>
                       <TotalItem column="Deaths" summaryType="sum" customizeText={this.summarizeGridText}/>
+                      <TotalItem column="Deaths Today" summaryType="sum" customizeText={this.summarizeGridText}/>
                       <TotalItem column="Active" summaryType="sum" customizeText={this.summarizeGridText}/>
+                      <TotalItem column="Critical" summaryType="sum" customizeText={this.summarizeGridText}/>
                     </Summary>
                   </DataGrid>
                 </TabPanelItem>
