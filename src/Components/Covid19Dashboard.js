@@ -102,7 +102,7 @@ class Covid19Dashboard extends React.Component {
         groupSize.push(i * 10000)
       }
 
-      for (let i = 1; i < 201; i++) {
+      for (let i = 1; i < 401; i++) {
         groupSize.push(i * 10000)
       }
 
@@ -352,7 +352,7 @@ class Covid19Dashboard extends React.Component {
         var dailyDeaths = formatNumber(parseInt(info.attribute('deathsDaily')[info.attribute('deathsDaily').length - 1].increase));
         return {
           text: '<b>' + info.attribute('region') + '</b>' +
-                '<br />&nbsp;<br />Confirmed: ' + formatNumber(parseInt(info.attribute('confirmed'))) + ' (' + dailyConfirmed + ')' +
+                '<br />&nbsp;<br />Cases: ' + formatNumber(parseInt(info.attribute('confirmed'))) + ' (' + dailyConfirmed + ')' +
                 '<br />Recovered: ' + formatNumber(parseInt(info.attribute('recovered'))) + ' (' + dailyRecovered + ')' +
                 '<br />Active: ' + formatNumber(parseInt(info.attribute('active'))) +
                 '<br />Deaths: ' + formatNumber(parseInt(info.attribute('deaths'))) + ' (' + dailyDeaths + ')'
@@ -458,7 +458,7 @@ class Covid19Dashboard extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <ResponsiveBox singleColumnScreen="sm" id="responsice-box" screenByWidth={this.screen} height={() => window.innerHeight}>
+        <ResponsiveBox singleColumnScreen="sm" id="responsive-box" screenByWidth={this.screen} height={() => window.innerHeight}>
           <Row ratio={3} />
           <Row ratio={3} screen="xs" />
           <Row ratio={1} />
@@ -533,7 +533,7 @@ class Covid19Dashboard extends React.Component {
                     <GroupItem colCount={2}>
                       <GroupItem>
                         <div className="dx-field">
-                          <div className="dx-field-label">Confirmed Cases</div>
+                          <div className="dx-field-label">Cases</div>
                           <div className="dx-field-value">
                             <TextBox readOnly={true}
                               hoverStateEnabled={false}
@@ -541,7 +541,7 @@ class Covid19Dashboard extends React.Component {
                           </div>
                         </div>
                         <div className="dx-field">
-                          <div className="dx-field-label">Active Cases</div>
+                          <div className="dx-field-label">Active</div>
                           <div className="dx-field-value">
                             <TextBox readOnly={true}
                               hoverStateEnabled={false}
@@ -551,7 +551,7 @@ class Covid19Dashboard extends React.Component {
                       </GroupItem>
                       <GroupItem>
                         <div className="dx-field">
-                          <div className="dx-field-label">Recovered Cases</div>
+                          <div className="dx-field-label">Recovered</div>
                           <div className="dx-field-value">
                             <TextBox readOnly={true}
                               hoverStateEnabled={false}
@@ -617,7 +617,7 @@ class Covid19Dashboard extends React.Component {
 
             <div className="dx-card responsive-paddings">
               <TabPanel className="tab-panel">
-                <TabPanelItem title="Confirmed Daily">
+                <TabPanelItem title="Cases Daily">
                   <Chart dataSource={this.state.confirmedDaily}>
                     <Size height={(window.innerHeight / 3)-70} />
                     <Series
@@ -670,7 +670,7 @@ class Covid19Dashboard extends React.Component {
                 </TabPanelItem>
               </TabPanel>
               <TabPanel className="tab-panel">
-                <TabPanelItem title="Confirmed Linear">
+                <TabPanelItem title="Cases Linear">
                   <Chart dataSource={this.state.confirmedDaily}>
                     <Size height={(window.innerHeight / 3)-70} />
                     <Series
@@ -723,7 +723,7 @@ class Covid19Dashboard extends React.Component {
                 </TabPanelItem>
               </TabPanel>
               <TabPanel className="tab-panel">
-                <TabPanelItem title="Confirmed Log.">
+                <TabPanelItem title="Cases Log.">
                   <Chart dataSource={this.state.confirmedDaily}>
                     <Size height={(window.innerHeight / 3)-70} />
                     <Series
