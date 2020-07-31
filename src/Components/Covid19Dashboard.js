@@ -102,7 +102,7 @@ class Covid19Dashboard extends React.Component {
         groupSize.push(i * 10000)
       }
 
-      for (let i = 1; i < 401; i++) {
+      for (let i = 1; i < 1001; i++) {
         groupSize.push(i * 10000)
       }
 
