@@ -94,17 +94,29 @@ class Covid19Dashboard extends React.Component {
         groupSize.push(i * 100)
       }
 
-      for (let i = 1; i < 101; i++) {
+      for (let i = 1; i < 11; i++) {
         groupSize.push(i * 1000)
       }
 
-      for (let i = 1; i < 101; i++) {
+      for (let i = 1; i < 4001; i++) {
         groupSize.push(i * 10000)
       }
 
-      for (let i = 1; i < 1001; i++) {
-        groupSize.push(i * 10000)
-      }
+      //for (let i = 1; i < 31; i++) {
+      //  groupSize.push(i * 1000000)
+      //}
+
+      //for (let i = 1; i < 11; i++) {
+      //  groupSize.push(i * 100000)
+      //}
+
+      //for (let i = 1; i < 11; i++) {
+      //  groupSize.push(i * 1000000)
+      //}
+
+      //for (let i = 1; i < 11; i++) {
+      //  groupSize.push(i * 10000000)
+      //}
 
       return groupSize
     } ();
@@ -496,7 +508,7 @@ class Covid19Dashboard extends React.Component {
                       elementType="bubble"
                       dataField="confirmed"
                       minSize={5}
-                      maxSize={100}
+                      maxSize={200}
                       opacity="0.8"
                       sizeGroups={this.sizeGroups}
                       color="#ff3300">
@@ -508,7 +520,7 @@ class Covid19Dashboard extends React.Component {
                       elementType="bubble"
                       dataField="recovered"
                       minSize={1}
-                      maxSize={100}
+                      maxSize={200}
                       opacity="0.8"
                       sizeGroups={this.sizeGroups}
                       color="#149414">
@@ -520,7 +532,7 @@ class Covid19Dashboard extends React.Component {
                       elementType="bubble"
                       dataField="deaths"
                       minSize={1}
-                      maxSize={100}
+                      maxSize={200}
                       opacity="0.8"
                       sizeGroups={this.sizeGroups}
                       color="#000000">
